@@ -5,9 +5,11 @@ interface NeonButtonProps {
     onClick?: () => void
     className?: string
     color?: 'blue' | 'purple' | 'pink' | 'green'
+    type?: 'button' | 'submit' | 'reset'
 }
 
 export default function NeonButton({
+    type = 'button',
     children,
     onClick,
     className = '',
@@ -32,6 +34,7 @@ export default function NeonButton({
                 ${className}
             `}
             onClick={onClick}
+            type={type}
         >
             <span className="relative z-10">{children}</span>
             <motion.div
