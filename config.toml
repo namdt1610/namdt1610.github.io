@@ -1,6 +1,6 @@
 # Zola configuration
 base_url = "https://namdt1610.github.io"
-title = "Nam Dang"
+title = "Nam (Viktok) Dang"
 description = "Systems Engineer | Rustacean | Backend Developer"
 default_language = "en"
 compile_sass = true
