@@ -5,8 +5,73 @@
     <link rel="self" type="application/atom+xml" href="https://namdt1610.github.io/atom.xml"/>
     <link rel="alternate" type="text/html" href="https://namdt1610.github.io"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2025-12-01T00:00:00+00:00</updated>
+    <updated>2026-01-20T00:00:00+00:00</updated>
     <id>https://namdt1610.github.io/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Exploiting SIMD for HFT Latency</title>
+        <published>2026-01-20T00:00:00+00:00</published>
+        <updated>2026-01-20T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://namdt1610.github.io/blog/rust-simd-hft/"/>
+        <id>https://namdt1610.github.io/blog/rust-simd-hft/</id>
+        
+        <content type="html" xml:base="https://namdt1610.github.io/blog/rust-simd-hft/">&lt;p&gt;In High Frequency Trading, if you are processing data with scalar instructions, you are leaving money on the table. Modern CPUs are vector machines disguised as scalar ones.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-bottleneck&quot;&gt;The Bottleneck&lt;&#x2F;h2&gt;
+&lt;p&gt;Parsing market data feeds (e.g., NASDAQ ITCH) involves transforming millions of bytes into integers and floats. Doing this one-by-one is &lt;strong&gt;slow&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Scalar Approach (Slow)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;pub fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;scalar_dot_product&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;: &amp;amp;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f32&lt;&#x2F;span&gt;&lt;span&gt;], &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;: &amp;amp;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f32&lt;&#x2F;span&gt;&lt;span&gt;]) -&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f32 &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    a.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;iter&lt;&#x2F;span&gt;&lt;span&gt;().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;zip&lt;&#x2F;span&gt;&lt;span&gt;(b).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;(|(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;y&lt;&#x2F;span&gt;&lt;span&gt;)| x * y).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sum&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The compiler attempts to auto-vectorize this, but it often fails due to strict IEEE 754 ordering rules or bounds checks.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;enter-std-simd&quot;&gt;Enter &lt;code&gt;std::simd&lt;&#x2F;code&gt;&lt;&#x2F;h2&gt;
+&lt;p&gt;Using portable SIMD (Single Instruction, Multiple Data), we can explicitly tell the CPU to process 8 floats at once (AVX2) or 16 (AVX-512).&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;#![&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;feature&lt;&#x2F;span&gt;&lt;span&gt;(portable_simd)]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::simd::f32x8;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;pub fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;vector_dot_product&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;a&lt;&#x2F;span&gt;&lt;span&gt;: &amp;amp;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f32&lt;&#x2F;span&gt;&lt;span&gt;], &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;b&lt;&#x2F;span&gt;&lt;span&gt;: &amp;amp;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f32&lt;&#x2F;span&gt;&lt;span&gt;]) -&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;f32 &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Process 8 items at a time
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; chunks_a = a.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;chunks_exact&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;8&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; chunks_b = b.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;chunks_exact&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;8&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; sum = f32x8::splat(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0.0&lt;&#x2F;span&gt;&lt;span&gt;);
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span&gt;(chunk_a, chunk_b) in chunks_a.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;zip&lt;&#x2F;span&gt;&lt;span&gt;(chunks_b) {
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; va = f32x8::from_slice(chunk_a);
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; vb = f32x8::from_slice(chunk_b);
+&lt;&#x2F;span&gt;&lt;span&gt;        sum += va * vb;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Reduce vector to scalar sum
+&lt;&#x2F;span&gt;&lt;span&gt;    sum.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;reduce_sum&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;the-hardware-reality&quot;&gt;The Hardware Reality&lt;&#x2F;h2&gt;
+&lt;p&gt;Your CPU has 256-bit (YMM) or 512-bit (ZMM) registers sitting idle.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Scalar&lt;&#x2F;strong&gt;: 1 operation per cycle.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;AVX2&lt;&#x2F;strong&gt;: 8 operations per cycle.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;AVX-512&lt;&#x2F;strong&gt;: 16 operations per cycle.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;real-world-results&quot;&gt;Real World Results&lt;&#x2F;h2&gt;
+&lt;p&gt;On a parsing algorithm for OB snapshot updates:&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Method&lt;&#x2F;th&gt;&lt;th&gt;Throughput&lt;&#x2F;th&gt;&lt;th&gt;Latency&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;Scalar&lt;&#x2F;td&gt;&lt;td&gt;1.2 GB&#x2F;s&lt;&#x2F;td&gt;&lt;td&gt;180 ns&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;strong&gt;AVX2&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;strong&gt;5.8 GB&#x2F;s&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;strong&gt;35 ns&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;Stop relying on the compiler to guess your intent. In critical hot paths, &lt;strong&gt;manual vectorization&lt;&#x2F;strong&gt; is the difference between getting the fill and missing the trade.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
     <entry xml:lang="en">
         <title>Building a Matching Engine in Rust</title>
         <published>2025-12-01T00:00:00+00:00</published>
