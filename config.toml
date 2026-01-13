@@ -1,0 +1,15 @@
+# Zola configuration
+base_url = "https://namdt1610.github.io"
+title = "Nam Dang"
+description = "Systems Engineer | Rustacean | Backend Developer"
+default_language = "en"
+compile_sass = true
+minify_html = true
+generate_feeds = false
+
+[markdown]
+highlight_code = true
+highlight_theme = "base16-ocean-dark"
+
+[extra]
+author = "Nam Dang"

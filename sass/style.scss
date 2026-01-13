@@ -1,0 +1,336 @@
+// Engineering Brutalism Theme
+// Colors
+$bg: #0a0a0a;
+$bg-alt: #111111;
+$fg: #e0e0e0;
+$fg-dim: #888888;
+$accent: #50fa7b;
+$accent-dim: #3d9e5a;
+
+// Breakpoints
+$max-width: 720px;
+
+// Reset
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 18px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "JetBrains Mono", "Fira Code", "Roboto Mono", monospace;
+  background: $bg;
+  color: $fg;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+// Layout
+.container {
+  max-width: $max-width;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+// Typography
+h1,
+h2,
+h3 {
+  color: $fg;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+}
+h2 {
+  font-size: 1.1rem;
+  color: $accent;
+  border-bottom: 1px solid $bg-alt;
+  padding-bottom: 0.5rem;
+  margin-top: 3rem;
+}
+h3 {
+  font-size: 1rem;
+  color: $fg-dim;
+  margin-top: 1.5rem;
+}
+
+p {
+  margin-bottom: 1rem;
+  color: $fg-dim;
+}
+
+// Terminal prompt style
+.prompt {
+  color: $accent;
+  &::before {
+    content: "> ";
+    color: $fg-dim;
+  }
+}
+
+// Header section
+.header {
+  margin-bottom: 2rem;
+
+  .whoami {
+    color: $fg-dim;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: $fg;
+    letter-spacing: -0.5px;
+  }
+
+  .title {
+    color: $accent;
+    font-size: 0.95rem;
+    margin: 0.5rem 0;
+  }
+
+  .location {
+    color: $fg-dim;
+    font-size: 0.85rem;
+  }
+}
+
+// Quote/Hook section
+.hook {
+  background: $bg-alt;
+  border-left: 3px solid $accent;
+  padding: 1rem 1.5rem;
+  margin: 2rem 0;
+  font-style: italic;
+  color: $fg-dim;
+}
+
+// Projects
+.project {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: $bg-alt;
+  border: 1px solid #1a1a1a;
+
+  .project-name {
+    color: $fg;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .stack,
+  .metric,
+  .highlight {
+    font-size: 0.85rem;
+    margin: 0.25rem 0;
+
+    strong {
+      color: $fg-dim;
+      font-weight: 400;
+    }
+
+    span {
+      color: $accent;
+    }
+  }
+
+  .highlight {
+    color: $fg-dim;
+    padding-left: 1rem;
+
+    li {
+      margin: 0.25rem 0;
+      list-style: none;
+
+      &::before {
+        content: "- ";
+        color: $accent;
+      }
+    }
+  }
+
+  .links {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+
+    a {
+      color: $accent;
+      text-decoration: none;
+      margin-right: 1rem;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// Blog/Notes list
+.notes-list {
+  list-style: none;
+
+  li {
+    margin: 0.5rem 0;
+    padding-left: 1rem;
+
+    &::before {
+      content: "$ ";
+      color: $accent;
+      margin-left: -1rem;
+    }
+
+    a {
+      color: $fg;
+      text-decoration: none;
+
+      &:hover {
+        color: $accent;
+      }
+    }
+  }
+}
+
+// Post content
+.post-content {
+  margin-top: 2rem;
+  
+  h2 {
+    font-size: 1.3rem;
+    color: $fg;
+    margin-top: 2.5rem;
+    border-bottom: none;
+    
+    &::before {
+      content: '## ';
+      color: $fg-dim;
+    }
+  }
+  
+  h3 {
+    font-size: 1.1rem;
+    color: $fg;
+    
+    &::before {
+      content: '### ';
+      color: $fg-dim;
+    }
+  }
+  
+  p {
+    margin-bottom: 1.2rem;
+    line-height: 1.7;
+  }
+  
+  ul, ol {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+    
+    li {
+      margin-bottom: 0.5rem;
+      color: $fg-dim;
+      
+      strong {
+        color: $fg;
+      }
+    }
+  }
+  
+  blockquote {
+    border-left: 3px solid $accent;
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    color: $fg-dim;
+  }
+  
+  img {
+    max-width: 100%;
+    border: 1px solid $bg-alt;
+    margin: 1rem 0;
+  }
+}
+
+// Date in list
+.date {
+  color: $fg-dim;
+  font-family: inherit;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;
+}
+
+// Footer
+.footer {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid $bg-alt;
+  font-size: 0.85rem;
+
+  .contact {
+    color: $fg-dim;
+
+    code {
+      color: $accent;
+      background: none;
+    }
+  }
+
+  .meta {
+    color: $fg-dim;
+    margin-top: 1rem;
+    font-size: 0.75rem;
+  }
+}
+
+// Links
+a {
+  color: $accent;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Code blocks
+code {
+  font-family: inherit;
+  background: $bg-alt;
+  padding: 0.1rem 0.3rem;
+  font-size: 0.9rem;
+}
+
+pre {
+  background: $bg-alt;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border-left: 3px solid $accent-dim;
+
+  code {
+    background: none;
+    padding: 0;
+  }
+}
+
+// Responsive
+@media (max-width: 600px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .header .name {
+    font-size: 1.4rem;
+  }
+}

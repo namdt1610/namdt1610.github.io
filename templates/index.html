@@ -1,0 +1,91 @@
+{% extends "base.html" %} {% block content %}
+<!-- Header -->
+<header class="header">
+  <div class="whoami">> whoami</div>
+  <h1 class="name">NAM DANG</h1>
+  <p class="title">Systems Engineer | Low-Level Enthusiast | Rustacean</p>
+  <p class="location">Based in Vietnam. Moving to Germany soon.</p>
+</header>
+
+<!-- Hook -->
+<blockquote class="hook">
+  "I optimize to bare-metal. No frameworks, no magic - just syscalls, memory
+  alignment, and microsecond latency. Simplicity is the ultimate
+  sophistication."
+</blockquote>
+
+<!-- Featured Projects -->
+<section>
+  <h2>// Featured Projects</h2>
+
+  <article class="project">
+    <h3 class="project-name">Limited Drop Engine</h3>
+    <p class="stack">
+      <strong>Stack:</strong> <span>Go (Fiber), SQLite (WAL Mode)</span>
+    </p>
+    <p class="metric">
+      <strong>Metric:</strong> <span>9,000 RPS</span> on local machine (SQLite +
+      Go Fiber)
+    </p>
+    <ul class="highlight">
+      <li>Optimized SQLite PRAGMA for high concurrency</li>
+      <li>Implemented Batch Insert pattern to reduce I/O syscalls</li>
+      <li>Zero-allocation hot paths in Go</li>
+    </ul>
+    <div class="links">
+      <a
+        href="https://github.com/namdt1610/limited-drop-platform"
+        target="_blank"
+        rel="noopener"
+        >GitHub</a
+      >
+      <a href="/blog/handling-9k-rps">Blog: "How I handled 9k RPS"</a>
+    </div>
+  </article>
+
+  <article class="project">
+    <h3 class="project-name">Rusty HFT OrderBook</h3>
+    <p class="stack">
+      <strong>Stack:</strong> <span>Rust, BTreeMap, Binary Persistence</span>
+    </p>
+    <p class="metric">
+      <strong>Metric:</strong> <span>< 5 microseconds</span> matching time
+    </p>
+    <ul class="highlight">
+      <li>Custom memory alignment (#[repr(C)]) to prevent padding overhead</li>
+      <li>Lock-free inspired logic using single-threaded event loop</li>
+      <li>Binary ledger for crash recovery</li>
+    </ul>
+    <div class="links">
+      <a
+        href="https://github.com/namdt1610/outlaw"
+        target="_blank"
+        rel="noopener"
+        >GitHub</a
+      >
+    </div>
+  </article>
+</section>
+
+<!-- Engineering Notes -->
+<section>
+  <h2>// Engineering Notes</h2>
+  <ul class="notes-list">
+    {% set section = get_section(path="blog/_index.md") %} {% for page in
+    section.pages | slice(end=3) %}
+    <li><a href="{{ page.permalink }}">{{ page.title }}</a></li>
+    {% endfor %}
+  </ul>
+  <div class="links" style="margin-top: 1rem">
+    <a href="/blog">cd ./blog</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <p class="contact">
+    <code>$ contact --email nam.dt161@gmail.com --github @namdt1610</code>
+  </p>
+  <p class="meta">generated using Zola (Rust)</p>
+</footer>
+{% endblock %}

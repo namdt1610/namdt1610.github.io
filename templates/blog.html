@@ -1,0 +1,21 @@
+{% extends "base.html" %} {% block content %}
+<header class="header">
+  <div class="whoami"><a href="/">cd ..</a></div>
+  <h1>// Engineering Notes</h1>
+</header>
+
+<ul class="notes-list">
+  {% for page in section.pages %}
+  <li>
+    <span class="date">[{{ page.date }}]</span>
+    <a href="{{ page.permalink }}">{{ page.title }}</a>
+  </li>
+  {% endfor %}
+</ul>
+
+<footer class="footer">
+  <p class="contact">
+    <code>$ contact --email nam.dt161@gmail.com --github @namdt1610</code>
+  </p>
+</footer>
+{% endblock %}
