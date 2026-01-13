@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Nam (Viktok) Dang</title>
+    <subtitle>Systems Engineer | Rustacean | Backend Developer</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://namdt1610.github.io/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://namdt1610.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-12-01T00:00:00+00:00</updated>
+    <id>https://namdt1610.github.io/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Building a Matching Engine in Rust</title>
+        <published>2025-12-01T00:00:00+00:00</published>
+        <updated>2025-12-01T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://namdt1610.github.io/blog/rusty-matching-engine/"/>
+        <id>https://namdt1610.github.io/blog/rusty-matching-engine/</id>
+        
+        <content type="html" xml:base="https://namdt1610.github.io/blog/rusty-matching-engine/">&lt;p&gt;For &lt;strong&gt;Outlaw&lt;&#x2F;strong&gt;, my HFT-style orderbook, I wanted &lt;strong&gt;sub-microsecond&lt;&#x2F;strong&gt; latency. Standard data structures were not enough.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-problem-with-padding&quot;&gt;The Problem with Padding&lt;&#x2F;h2&gt;
+&lt;p&gt;In Rust (and C), structs are aligned in memory.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;struct &lt;&#x2F;span&gt;&lt;span&gt;Order {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u64&lt;&#x2F;span&gt;&lt;span&gt;,    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; 8 bytes
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;active&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;bool &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; 1 byte
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; 7 bytes of PADDING here!
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;That padding is wasted cache space. In HFT, L3 cache misses are death.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-solution-repr-c-packed&quot;&gt;The Solution: &lt;code&gt;#[repr(C, packed)]&lt;&#x2F;code&gt;&lt;&#x2F;h2&gt;
+&lt;p&gt;I forced the compiler to pack the struct, but this comes with alignment penalties if you&#x27;re not careful.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;repr&lt;&#x2F;span&gt;&lt;span&gt;(C)]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;struct &lt;&#x2F;span&gt;&lt;span&gt;Order {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;price&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u64&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;quantity&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u64&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;order_id&lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;u128&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;lock-free-logic&quot;&gt;Lock-Free Logic&lt;&#x2F;h2&gt;
+&lt;p&gt;Mutexes are slow. &lt;code&gt;RwLock&lt;&#x2F;code&gt; is slower.&lt;&#x2F;p&gt;
+&lt;p&gt;I architected the engine as a &lt;strong&gt;Single-Threaded Event Loop&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;All incoming orders go into a Ring Buffer (LMAX Disruptor style).&lt;&#x2F;li&gt;
+&lt;li&gt;A single consumer thread pulls orders and mutates the Orderbook.&lt;&#x2F;li&gt;
+&lt;li&gt;No locks needed because only ONE thread touches the book.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;binary-persistence&quot;&gt;Binary Persistence&lt;&#x2F;h2&gt;
+&lt;p&gt;JSON is slow. Protobuf is okay. Raw bytes are king.&lt;&#x2F;p&gt;
+&lt;p&gt;I wrote a custom serializer that memcpys the struct directly to a memory-mapped file for crash recovery.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Pseudo-code
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;unsafe &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    std::ptr::copy_nonoverlapping(
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;amp;order as &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*const &lt;&#x2F;span&gt;&lt;span&gt;_ as &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;*const u8&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;        buffer_ptr,
+&lt;&#x2F;span&gt;&lt;span&gt;        std::mem::size_of::&amp;lt;Order&amp;gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;    );
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;em&gt;Don&#x27;t try this at home unless you know exactly what you are doing.&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;result&quot;&gt;Result&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;&amp;lt; 5 microseconds&lt;&#x2F;strong&gt; matching time per order.
+The engine runs faster than the network cards can deliver packets.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>How I Handled 9k RPS with Go Fiber and SQLite</title>
+        <published>2025-11-20T00:00:00+00:00</published>
+        <updated>2025-11-20T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://namdt1610.github.io/blog/handling-9k-rps/"/>
+        <id>https://namdt1610.github.io/blog/handling-9k-rps/</id>
+        
+        <content type="html" xml:base="https://namdt1610.github.io/blog/handling-9k-rps/">&lt;p&gt;I validated my &lt;strong&gt;Limited Drop Platform&lt;&#x2F;strong&gt; architecture by pushing it to the limit. The goal: handle a flash sale with thousands of concurrent users trying to buy a limited stock item.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-architecture&quot;&gt;The Architecture&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Language:&lt;&#x2F;strong&gt; Go (1.23+)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Web Framework:&lt;&#x2F;strong&gt; Fiber (Zero allocation)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Database:&lt;&#x2F;strong&gt; SQLite (WAL Mode)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Host:&lt;&#x2F;strong&gt; Local machine (Ryzen 5, 16GB RAM)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;the-bottleneck-race-conditions&quot;&gt;The Bottleneck: Race Conditions&lt;&#x2F;h2&gt;
+&lt;p&gt;When 1,000 users try to buy the last item at the exact same millisecond, you have a race condition.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;naive-approach-wrong&quot;&gt;Naive Approach (Wrong)&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;go&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;product &lt;&#x2F;span&gt;&lt;span&gt;:= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;db&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;GetProduct&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;product&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Stock &lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;product&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Stock&lt;&#x2F;span&gt;&lt;span&gt;--
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;db&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Save&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;product&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Success&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; FAILS under load
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This fails because 50 goroutines can read &lt;code&gt;Stock = 1&lt;&#x2F;code&gt; at the same time.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;the-fix-pessimistic-locking&quot;&gt;The Fix: Pessimistic Locking&lt;&#x2F;h3&gt;
+&lt;p&gt;I used &lt;code&gt;UPDATE ... WHERE&lt;&#x2F;code&gt; atomic queries to let the database handle the locking.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Atomic decrement
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;result &lt;&#x2F;span&gt;&lt;span&gt;:= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;db&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Exec&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;UPDATE products SET stock = stock - 1 WHERE id = ? AND stock &amp;gt; 0&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;result&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;RowsAffected &lt;&#x2F;span&gt;&lt;span&gt;== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0 &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Sold Out&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Proceed to create order
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;performance-tuning&quot;&gt;Performance Tuning&lt;&#x2F;h2&gt;
+&lt;p&gt;To hit 9,000 RPS, I had to optimize the hot path:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Prepared Statements&lt;&#x2F;strong&gt;: Disable re-parsing SQL for every query.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Fiber Prefork&lt;&#x2F;strong&gt;: Use &lt;code&gt;SO_REUSEPORT&lt;&#x2F;code&gt; to spin up multiple Go processes (though on SQLite, single process usually wins due to lock contention).&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Zero Allocation&lt;&#x2F;strong&gt;: Avoid &lt;code&gt;fmt.Sprintf&lt;&#x2F;code&gt; in hot paths. Use &lt;code&gt;strconv&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;result&quot;&gt;Result&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;9k RPS&lt;&#x2F;strong&gt; sustained.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;p99 Latency:&lt;&#x2F;strong&gt; &amp;lt; 15ms.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;CPU Usage:&lt;&#x2F;strong&gt; 60%.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Proof that a monolith is not just viable, it&#x27;s often &lt;strong&gt;superior&lt;&#x2F;strong&gt; for raw throughput per dollar.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Why SQLite WAL Mode is Faster Than You Think</title>
+        <published>2025-10-15T00:00:00+00:00</published>
+        <updated>2025-10-15T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://namdt1610.github.io/blog/sqlite-wal/"/>
+        <id>https://namdt1610.github.io/blog/sqlite-wal/</id>
+        
+        <content type="html" xml:base="https://namdt1610.github.io/blog/sqlite-wal/">&lt;p&gt;Everyone thinks SQLite is a toy database. &quot;It doesn&#x27;t handle concurrency!&quot; they scream. &quot;Use Postgres!&quot; they yell.&lt;&#x2F;p&gt;
+&lt;p&gt;They are wrong.&lt;&#x2F;p&gt;
+&lt;p&gt;When properly configured with &lt;strong&gt;WAL (Write-Ahead Logging)&lt;&#x2F;strong&gt; mode, SQLite is a beast. I used it to handle &lt;strong&gt;9,000 requests per second&lt;&#x2F;strong&gt; on a single cheap VPS.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-myth-of-database-locks&quot;&gt;The Myth of &quot;Database Locks&quot;&lt;&#x2F;h2&gt;
+&lt;p&gt;By default, SQLite uses a rollback journal. This means:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;When writing, it locks the &lt;em&gt;entire&lt;&#x2F;em&gt; database file.&lt;&#x2F;li&gt;
+&lt;li&gt;Readers have to wait.&lt;&#x2F;li&gt;
+&lt;li&gt;Writers have to wait.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;This is shit for high concurrency.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;enter-wal-mode&quot;&gt;Enter WAL Mode&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;sql&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-sql &quot;&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;&lt;span&gt;PRAGMA journal_mode = WAL;
+&lt;&#x2F;span&gt;&lt;span&gt;PRAGMA synchronous = NORMAL;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;With WAL mode enabled:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Readers do not block writers.&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Writers do not block readers.&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;Changes are appended to a &lt;code&gt;-wal&lt;&#x2F;code&gt; file, then checkpointed back to the main DB.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;the-batch-insert-trick&quot;&gt;The &quot;Batch Insert&quot; Trick&lt;&#x2F;h2&gt;
+&lt;p&gt;Syscalls are expensive. Opening a transaction is expensive.&lt;&#x2F;p&gt;
+&lt;p&gt;If you insert 1,000 records one by one:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;1,000 filesystem syncs.&lt;&#x2F;li&gt;
+&lt;li&gt;1,000 lock acquisitions.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;If you batch them:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tx &lt;&#x2F;span&gt;&lt;span&gt;:= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;db&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Begin&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;_&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;record &lt;&#x2F;span&gt;&lt;span&gt;:= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;range &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;records &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tx&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Create&lt;&#x2F;span&gt;&lt;span&gt;(&amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;record&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tx&lt;&#x2F;span&gt;&lt;span&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Commit&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;strong&gt;1 filesystem sync.&lt;&#x2F;strong&gt; That&#x27;s how you get 100x performance.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;Stop over-engineering with Kubernetes and Microservices for your 100-user app. A single binary with SQLite running in WAL mode can take you further than you think.&lt;&#x2F;p&gt;
+&lt;p&gt;Keep it simple. Keep it fast.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

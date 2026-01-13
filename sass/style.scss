@@ -293,6 +293,58 @@ p {
   }
 }
 
+// Print styles
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  .container {
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  a {
+    color: #000;
+    text-decoration: none;
+    
+    &::after {
+      content: " (" attr(href) ")";
+      font-size: 0.8em;
+      color: #555;
+    }
+  }
+  
+  .header, .project, section {
+    break-inside: avoid;
+  }
+  
+  .hook, .footer .meta {
+    display: none; // Hide non-essential elements for print
+  }
+  
+  h1, h2, h3 {
+    color: #000;
+  }
+  
+  h2 {
+    border-bottom: 2px solid #000;
+  }
+  
+  .project {
+    border: 1px solid #ccc;
+    background: #fff;
+  }
+  
+  code {
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+  }
+}
+
 // Links
 a {
   color: $accent;

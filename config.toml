@@ -5,7 +5,8 @@ description = "Systems Engineer | Rustacean | Backend Developer"
 default_language = "en"
 compile_sass = true
 minify_html = true
-generate_feeds = false
+generate_feeds = true
+feed_filenames = ["atom.xml"]
 
 [markdown]
 highlight_code = true
