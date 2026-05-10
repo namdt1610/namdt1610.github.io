@@ -1,97 +1,124 @@
-{% extends "base.html" %} {% block content %}
-<!-- Header -->
-<header class="header">
-  <div class="whoami">> whoami</div>
-  <h1 class="name">NAM (VIKTOR) DANG</h1>
-  <p class="title">Systems Engineer | Low-Level Enthusiast | Rustacean</p>
-  <p class="location">Based in Vietnam. Moving to Germany soon.</p>
+{% extends "base.html" %} 
+{% block content %}
+<header class="portfolio-hero">
+  <div class="hero-content">
+    <h1 class="name">Nam (Viktor) Dang</h1>
+    <h2 class="hero-title">Software Engineer &rarr; Infrastructure & Low-Level</h2>
+    <p class="hero-description">
+      Currently a Software Engineer with a deep passion for the lower levels of the stack. I am actively expanding my expertise into network infrastructure (CCNA) and Linux systems administration (LPI) to build resilient, high-performance systems from the bare metal up.
+    </p>
+    <div class="hero-actions">
+      <a href="/resume" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        View Full Resume
+      </a>
+      <a href="https://github.com/namdt1610" target="_blank" rel="noopener" class="btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+        GitHub
+      </a>
+    </div>
+  </div>
 </header>
 
-<!-- Hook -->
-<blockquote class="hook">
-  "I optimize to bare-metal. No frameworks, no magic - just syscalls, memory
-  alignment, and microsecond latency. Simplicity is the ultimate
-  sophistication."
-</blockquote>
-
-<!-- Featured Projects -->
-<section>
-  <h2>// Featured Projects</h2>
-
-  <article class="project">
-    <h3 class="project-name">Limited Drop Engine</h3>
-    <p class="stack">
-      <strong>Stack:</strong> <span>Go (Fiber), SQLite (WAL Mode)</span>
-    </p>
-    <p class="metric">
-      <strong>Metric:</strong> <span>9,000 RPS</span> on local machine (SQLite +
-      Go Fiber)
-    </p>
-    <ul class="highlight">
-      <li>Optimized SQLite PRAGMA for high concurrency</li>
-      <li>Implemented Batch Insert pattern to reduce I/O syscalls</li>
-      <li>Zero-allocation hot paths in Go</li>
-    </ul>
-    <div class="links">
-      <a
-        href="https://github.com/namdt1610/limited-drop-platform"
-        target="_blank"
-        rel="noopener"
-        >GitHub</a
-      >
-      <a href="/blog/handling-9k-rps">Blog: "How I handled 9k RPS"</a>
+<section class="portfolio-section">
+  <div class="section-header">
+    <h2>Core Specializations</h2>
+  </div>
+  <div class="grid grid-2">
+    <div class="card spec-card">
+      <div class="card-icon">🌐</div>
+      <h3>Network Engineering</h3>
+      <p>Focused on routing, switching, and robust infrastructure design. Working towards <strong>CCNA</strong> certification.</p>
     </div>
-  </article>
-
-  <article class="project">
-    <h3 class="project-name">Rusty HFT OrderBook</h3>
-    <p class="stack">
-      <strong>Stack:</strong> <span>Rust, BTreeMap, Binary Persistence</span>
-    </p>
-    <p class="metric">
-      <strong>Metric:</strong> <span>< 5 microseconds</span> matching time
-    </p>
-    <ul class="highlight">
-      <li>Custom memory alignment (#[repr(C)]) to prevent padding overhead</li>
-      <li>Lock-free inspired logic using single-threaded event loop</li>
-      <li>Binary ledger for crash recovery</li>
-    </ul>
-    <div class="links">
-      <a
-        href="https://github.com/namdt1610/outlaw"
-        target="_blank"
-        rel="noopener"
-        >GitHub</a
-      >
+    <div class="card spec-card">
+      <div class="card-icon">🐧</div>
+      <h3>Linux Systems</h3>
+      <p>Deep understanding of Linux internals, OS-level tuning, and system administration. Following the <strong>LPI</strong> track.</p>
     </div>
-  </article>
-</section>
-
-<!-- Engineering Notes -->
-<section>
-  <h2>// Engineering Notes</h2>
-  <ul class="notes-list">
-    {% set section = get_section(path="blog/_index.md") %} {% for page in
-    section.pages | slice(end=3) %}
-    <li><a href="{{ page.permalink }}">{{ page.title }}</a></li>
-    {% endfor %}
-  </ul>
-  <div class="links" style="margin-top: 1rem">
-    <a href="/blog">cd ./blog</a>
+    <div class="card spec-card">
+      <div class="card-icon">⚡</div>
+      <h3>Low-Level Backend</h3>
+      <p>Building high-concurrency systems and zero-allocation hot paths using <strong>Rust</strong>, <strong>C/C++</strong>, and <strong>Golang</strong>.</p>
+    </div>
+    <div class="card spec-card">
+      <div class="card-icon">🤖</div>
+      <h3>AI Tooling & Automation</h3>
+      <p>Integrating and leveraging state-of-the-art LLMs like <strong>GPT, Gemini, Claude, and Grok</strong> for rapid architecture design and system automation.</p>
+    </div>
   </div>
 </section>
 
-<!-- Footer -->
+<section class="portfolio-section">
+  <div class="section-header">
+    <h2>Featured Projects</h2>
+  </div>
+  <div class="grid grid-2">
+    <div class="card project-card">
+      <div class="project-header">
+        <h3>ITAM Telemetry Daemon</h3>
+        <span class="project-badge">Go / OS APIs / GPO</span>
+      </div>
+      <p>A lightweight, cross-platform daemon harvesting system telemetry via low-level OS APIs. Engineered network resilience with Circuit Breakers and Jitter patterns to prevent thundering herds from thousands of edge agents.</p>
+      <div class="project-footer" style="color: var(--fg-dim);">
+        An Binh Hospital (Internship)
+      </div>
+    </div>
+    <a href="https://github.com/namdt1610/limited-drop-platform" target="_blank" rel="noopener" class="card project-card">
+      <div class="project-header">
+        <h3>Donald Vibe Engine</h3>
+        <span class="project-badge">Go / SQLite WAL / Docker</span>
+      </div>
+      <p>Architected a high-concurrency transactional engine surviving "thundering herd" traffic spikes. Executed C-level OS tuning on SQLite (fsync reduction, WAL) to sustain 10,000+ writes/sec with sub-0.1ms latency.</p>
+      <div class="project-footer">
+        View Repository &rarr;
+      </div>
+    </a>
+  </div>
+</section>
+
+<section class="portfolio-section" style="margin-top: -1rem;">
+  <div class="section-header">
+    <h2>Side SaaS Project</h2>
+  </div>
+  <a href="https://ezsplit.vercel.app" target="_blank" rel="noopener" class="card project-card" style="display: block; border-color: var(--accent);">
+    <div class="project-header">
+      <h3 style="color: var(--accent);">EZSplit</h3>
+      <span class="project-badge">Fullstack / Vercel</span>
+    </div>
+    <p>My first SaaS application. A streamlined platform for expense tracking and bill splitting, optimized for fast performance and deployed on Vercel's edge infrastructure.</p>
+    <div class="project-footer" style="margin-top: 1rem;">
+      View Live App &rarr;
+    </div>
+  </a>
+</section>
+
+<section class="portfolio-section">
+  <div class="section-header">
+    <h2>Engineering Notes</h2>
+  </div>
+  <div class="grid grid-3">
+    {% set section = get_section(path="blog/_index.md") %} 
+    {% for page in section.pages | slice(end=3) %}
+    <a href="{{ page.permalink }}" class="card blog-card">
+      <span class="date">{{ page.date | date(format="%B %d, %Y") }}</span>
+      <h3>{{ page.title }}</h3>
+    </a>
+    {% endfor %}
+  </div>
+  <div class="center-actions" style="margin-top: 2rem; text-align: center;">
+    <a href="/blog" class="btn">View all notes</a>
+  </div>
+</section>
+
 <footer class="footer">
-  <p class="contact">
-    <code>$ contact --email nam.dt161@gmail.com --github @namdt1610</code>
-  </p>
-  <p class="meta">
-    generated using Zola (Rust) | <a href="/atom.xml">RSS</a> |
-    <span title="This is a PGP Fingerprint for secure communication"
-      >PGP: <code>8EF8 E58B F21C 7D23 65C1 9249 D66F 69E5 F81F 56D8</code></span
-    >
-    > >
-  </p>
+  <div>DANG TRAN NAM &copy; {{ now() | date(format="%Y") }}</div>
+  <div class="footer-links">
+    <a href="mailto:nam.dt161@gmail.com">Email</a> &middot;
+    <a href="https://linkedin.com/in/namdt1610" target="_blank" rel="noopener">LinkedIn</a>
+  </div>
 </footer>
 {% endblock %}

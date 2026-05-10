@@ -1,13 +1,4 @@
-<!--
-   ____  __  __  ____   ___   ____  ____    ____    ____  __  __  ____  
-  (  _ \(  )(  )(_  _) / __) (_  _)(  _ \  (  _ \  (  _ \(  )(  )(_  _) 
-   )   / )(__)(   )(  ( (__   _)(_  )___/   ) _ <   )   / )(__)(   )(   
-  (_)\_)(______) (__)  \___) (____)(__)    (____/  (_)\_)(______) (__)  
-                                                                        
-  Systems Engineer | Low-Level Enthusiast | Rustacean
-  Built with Zola. No JS. Just Engineering.
-  Owner: Nam (Viktor) Dang
--->
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -15,34 +6,22 @@
     <meta name="description" content="{{ config.description }}" />
     <meta name="author" content="{{ config.extra.author }}" />
     <meta name="robots" content="index, follow" />
-    <title>{{ config.title }} - Systems Engineer</title>
+    <title>{{ config.title }} - Software Engineer</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link
-      rel="preload"
-      href="/fonts/JetBrainsMono-Regular.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <style>
-      @font-face {
-        font-family: "JetBrains Mono";
-        src: url("/fonts/JetBrainsMono-Regular.woff2") format("woff2");
-        font-weight: 400;
-        font-style: normal;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: "JetBrains Mono";
-        src: url("/fonts/JetBrainsMono-Bold.woff2") format("woff2");
-        font-weight: 700;
-        font-style: normal;
-        font-display: swap;
-      }
-    </style>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <main class="container">{% block content %}{% endblock %}</main>
+    <!--
+      Hi there! Thanks for inspecting the source.
+      This site is built minimally with Zola + Sass. No heavy JS frameworks.
+    -->
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
   </body>
 </html>

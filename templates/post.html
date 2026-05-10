@@ -1,17 +1,30 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} 
+{% block content %}
 <header class="header">
-  <div class="whoami"><a href="/blog">cd ..</a></div>
-  <h1>{{ page.title }}</h1>
-  <p class="date">
-    Date: {{ page.date }} | Read time: {{ page.reading_time }} min
-  </p>
+  <div class="header-top">
+    <div>
+      <a href="/blog" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; color: var(--fg-dim); font-size: 0.9rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Notes
+      </a>
+      <h1 class="name">{{ page.title }}</h1>
+      <div class="location" style="margin-top: 0.5rem;">
+        {{ page.date | date(format="%B %d, %Y") }} &middot; {{ page.reading_time }} min read
+      </div>
+    </div>
+  </div>
 </header>
 
-<article class="post-content">{{ page.content | safe }}</article>
+<article class="post-content">
+  {{ page.content | safe }}
+</article>
 
 <footer class="footer">
-  <p class="contact">
-    <code>$ contact --email nam.dt161@gmail.com --github @namdt1610</code>
-  </p>
+  <div>DANG TRAN NAM &copy; {{ now() | date(format="%Y") }}</div>
+  <div>
+    <a href="mailto:nam.dt161@gmail.com">Contact</a>
+  </div>
 </footer>
 {% endblock %}

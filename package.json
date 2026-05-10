@@ -1,0 +1,24 @@
+{
+  "name": "namdt1610.github.io",
+  "version": "1.0.0",
+  "description": "A \"No Bullshit. Just Engineering.\" portfolio built with [Zola](https://www.getzola.org/) (Rust SSG).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/namdt1610/namdt1610.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/namdt1610/namdt1610.github.io/issues"
+  },
+  "homepage": "https://github.com/namdt1610/namdt1610.github.io#readme",
+  "dependencies": {
+    "puppeteer": "^24.43.0"
+  }
+}
