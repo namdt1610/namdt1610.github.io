@@ -8,17 +8,49 @@
     <meta name="robots" content="index, follow" />
     <title>{{ config.title }} - Software Engineer</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="/style.css" />
+
+    <link rel="stylesheet" href="https://unpkg.com/terminal.css@0.7.4/dist/terminal.min.css" />
+    <style>
+      @font-face {
+        font-family: 'JetBrains Mono';
+        src: url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'JetBrains Mono';
+        src: url('/fonts/JetBrainsMono-Bold.woff2') format('woff2');
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+      :root {
+        --font-stack: 'JetBrains Mono', Menlo, Monaco, 'Liberation Mono', monospace;
+        --mono-font-stack: 'JetBrains Mono', Menlo, Monaco, 'Liberation Mono', monospace;
+        --primary-color: #2563eb;
+        --secondary-color: #4b5563;
+        --font-color: #111827;
+        --background-color: #ffffff;
+        --code-bg-color: #fafafa;
+      }
+      .badge {
+        font-size: 0.75rem;
+        font-family: var(--mono-font-stack);
+        color: var(--secondary-color);
+      }
+      .dim { color: var(--secondary-color); }
+      .no-print { }
+      @media print {
+        .no-print, .terminal-nav { display: none !important; }
+        .terminal-card { page-break-inside: avoid; break-inside: avoid; }
+      }
+    </style>
   </head>
-  <body>
+  <body class="terminal">
     <!--
       Hi there! Thanks for inspecting the source.
-      This site is built minimally with Zola + Sass. No heavy JS frameworks.
+      This site is built minimally with Zola + Terminal CSS. No heavy JS frameworks.
     -->
     <main class="container">
       {% block content %}{% endblock %}

@@ -16,7 +16,7 @@ const puppeteer = require('puppeteer');
 
   console.log('Generating vector PDF...');
   await page.pdf({
-    path: 'static/Nam_Dang_CV.pdf',
+    path: 'static/resume.pdf',
     format: 'A4',
     printBackground: true,
     margin: {
@@ -28,5 +28,5 @@ const puppeteer = require('puppeteer');
   });
 
   await browser.close();
-  console.log('Success! PDF saved to static/Nam_Dang_CV.pdf');
+  console.log('Success! PDF saved to static/resume.pdf');
 })();

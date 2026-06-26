@@ -1,155 +1,122 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 {% block content %}
-<header class="portfolio-hero">
-  <div class="hero-content">
-    <h1 class="name">Nam (Tyler) Dang</h1>
-    <h2 class="hero-title">Software Engineer</h2>
-    <p class="hero-description">
-      A detail-oriented Software Engineer with a strong interest in backend/database architecture and performance optimization. I build reliable, high-efficiency systems through clean, maintainable code and data-driven latency optimization.
-    </p>
-    <div class="hero-actions">
-      <a href="/resume" class="btn btn-primary">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        View Full Resume
-      </a>
-      <a href="https://github.com/namdt1610" target="_blank" rel="noopener" class="btn">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-        </svg>
-        GitHub
-      </a>
-    </div>
-  </div>
+<div class="terminal-nav">
+  <header class="terminal-logo">
+    <div class="logo terminal-prompt"><a href="/" class="no-style">Nam (Tyler) Dang</a></div>
+  </header>
+  <nav class="terminal-menu">
+    <ul>
+      <li><a href="/resume" class="menu-item">Resume</a></li>
+      <li><a href="/blog" class="menu-item">Blog</a></li>
+      <li><a href="https://github.com/namdt1610" target="_blank" rel="noopener" class="menu-item">GitHub</a></li>
+    </ul>
+  </nav>
+</div>
+
+<header>
+  <h2>Software Engineer</h2>
+  <p>A detail-oriented Software Engineer with a strong interest in backend/database architecture and performance optimization. I build reliable, high-efficiency systems through clean, maintainable code and data-driven latency optimization.</p>
+  <p>
+    <a href="/resume" class="btn btn-primary">View Full Resume</a>
+    <a href="https://github.com/namdt1610" target="_blank" rel="noopener" class="btn">GitHub</a>
+  </p>
 </header>
 
-<section class="portfolio-section">
-  <div class="section-header">
-    <h2>Core Specializations</h2>
+<section>
+  <header><h2>Core Specializations</h2></header>
+  <div class="terminal-card">
+    <header>Backend &amp; Database</header>
+    <div>Building high-concurrency systems with Go, Java, and C/C++, focused on database architecture and query performance.</div>
   </div>
-  <div class="grid grid-2">
-    <div class="card spec-card">
-      <div class="card-icon">⚡</div>
-      <h3>Backend & Database</h3>
-      <p>Building high-concurrency systems with <strong>Go</strong>, <strong>Java</strong>, and <strong>C/C++</strong>, focused on database architecture and query performance.</p>
+  <div class="terminal-card">
+    <header>Linux</header>
+    <div>Comfortable working day-to-day on Linux for development and systems work.</div>
+  </div>
+</section>
+
+<section>
+  <header><h2>Featured Projects</h2></header>
+  <div class="terminal-card">
+    <header>ITAM Telemetry System <span class="badge">Go / Circuit Breaker / HMAC</span></header>
+    <div>
+      <p><strong>Problem:</strong> 100+ edge devices needed centralized monitoring without overwhelming the server on reconnect storms.</p>
+      <p><strong>Solution:</strong> cross-platform Go agent harvesting CPU/RAM/Disk metrics, with Circuit Breaker + exponential backoff/jitter to absorb thundering-herd reconnects.</p>
+      <p><strong>Result:</strong> 99.9% uptime, memory footprint cut over 60% to under 15MB.</p>
+      <p class="dim">An Binh Hospital (Internship)</p>
     </div>
-    <div class="card spec-card">
-      <div class="card-icon">🐧</div>
-      <h3>Linux</h3>
-      <p>Comfortable working day-to-day on Linux for development and systems work.</p>
+  </div>
+  <div class="terminal-card">
+    <header>High-Concurrency Inventory Engine <span class="badge">Go / PostgreSQL / ACID</span></header>
+    <div>
+      <p><strong>Problem:</strong> peak-traffic transaction volume caused race conditions that risked over-selling.</p>
+      <p><strong>Solution:</strong> optimistic locking with version columns, ACID transactions, multi-column indexes.</p>
+      <p><strong>Result:</strong> average query time down 50%, zero over-selling under concurrent writes.</p>
+      <p><a href="https://github.com/namdt1610/limited-drop-platform" target="_blank" rel="noopener">View Repository &rarr;</a></p>
     </div>
   </div>
 </section>
 
-<section class="portfolio-section">
-  <div class="section-header">
-    <h2>Featured Projects</h2>
-  </div>
-  <div class="grid grid-2">
-    <div class="card project-card">
-      <div class="project-header">
-        <h3>ITAM Telemetry System</h3>
-        <span class="project-badge">Go / Circuit Breaker / HMAC</span>
-      </div>
-      <p><strong>Problem:</strong> 100+ edge devices needed centralized monitoring without overwhelming the server on reconnect storms. <strong>Solution:</strong> cross-platform Go agent harvesting CPU/RAM/Disk metrics, with Circuit Breaker + exponential backoff/jitter to absorb thundering-herd reconnects. <strong>Result:</strong> 99.9% uptime, memory footprint cut over 60% to under 15MB.</p>
-      <div class="project-footer" style="color: var(--fg-dim);">
-        An Binh Hospital (Internship)
-      </div>
+<section>
+  <header><h2>Trading &amp; Crypto Systems</h2></header>
+  <div class="terminal-card">
+    <header>Quant Trading Monorepo <span class="badge">Go / Python / GCP</span></header>
+    <div>
+      <p><strong>Problem:</strong> capture riskless edge across two markets without directional bets.</p>
+      <p><strong>Solution:</strong> HOSE ETF arbitrage + DCA on VNDIAMOND via DNSE API, plus a delta-neutral cash &amp; carry bot (spot long / perp short) harvesting Binance funding rate &mdash; replacing an earlier XGBoost/Z-score directional model scrapped after 3 years of backtests confirmed it couldn't beat EMH.</p>
+      <p><strong>Result:</strong> targets funding APR &gt;119%, running 24/7 on GCP with an automatic kill switch when yield decays below 10% APR.</p>
+      <p><a href="https://github.com/namdt1610/quant_crypto_trading" target="_blank" rel="noopener">View Repository &rarr;</a></p>
     </div>
-    <a href="https://github.com/namdt1610/limited-drop-platform" target="_blank" rel="noopener" class="card project-card">
-      <div class="project-header">
-        <h3>High-Concurrency Inventory Engine</h3>
-        <span class="project-badge">Go / PostgreSQL / ACID</span>
-      </div>
-      <p><strong>Problem:</strong> peak-traffic transaction volume caused race conditions that risked over-selling. <strong>Solution:</strong> optimistic locking with version columns, ACID transactions, multi-column indexes. <strong>Result:</strong> average query time down 50%, zero over-selling under concurrent writes.</p>
-      <div class="project-footer">
-        View Repository &rarr;
-      </div>
-    </a>
+  </div>
+  <div class="terminal-card">
+    <header>Multi-Chain Airdrop Farm <span class="badge">TypeScript / CLI + Web UI</span></header>
+    <div>
+      <p><strong>Problem:</strong> running farming tasks (swap/nft/faucet/deploy) consistently across many chains without manual repetition.</p>
+      <p><strong>Solution:</strong> CLI + web dashboard bot with per-chain task config and automated GCP deployment (PM2).</p>
+      <p><strong>Result:</strong> 14 EVM testnets/mainnets supported (Monad, Berachain, Base, Scroll, zkSync, and more) from one codebase.</p>
+      <p><a href="https://github.com/namdt1610/trading_system" target="_blank" rel="noopener">View Repository &rarr;</a></p>
+    </div>
   </div>
 </section>
 
-<section class="portfolio-section">
-  <div class="section-header">
-    <h2>Trading & Crypto Systems</h2>
+<section>
+  <header><h2>Side Projects</h2></header>
+  <div class="terminal-card">
+    <header>EzSplit <span class="badge">Next.js / Supabase</span></header>
+    <div>
+      <p><strong>Problem:</strong> learning English vocabulary by rote gives no insight into word structure or origin.</p>
+      <p><strong>Solution:</strong> Next.js + Supabase tool that splits any word into prefix/root/suffix and traces its Latin/Greek etymology, with a spaced-repetition study mode.</p>
+      <p><strong>Result:</strong> shipped as a live SaaS product with email-based lookup history.</p>
+      <p><a href="https://ezsplit.vercel.app" target="_blank" rel="noopener">View Live App &rarr;</a></p>
+    </div>
   </div>
-  <div class="grid grid-2">
-    <a href="https://github.com/namdt1610/quant_crypto_trading" target="_blank" rel="noopener" class="card project-card">
-      <div class="project-header">
-        <h3>Quant Trading Monorepo</h3>
-        <span class="project-badge">Go / Python / GCP</span>
-      </div>
-      <p><strong>Problem:</strong> capture riskless edge across two markets without directional bets. <strong>Solution:</strong> HOSE ETF arbitrage + DCA on VNDIAMOND via DNSE API, plus a delta-neutral cash & carry bot (spot long / perp short) harvesting Binance funding rate — replacing an earlier XGBoost/Z-score directional model scrapped after 3 years of backtests confirmed it couldn't beat EMH. <strong>Result:</strong> targets funding APR &gt;119%, running 24/7 on GCP with an automatic kill switch when yield decays below 10% APR.</p>
-      <div class="project-footer">
-        View Repository &rarr;
-      </div>
-    </a>
-    <a href="https://github.com/namdt1610/trading_system" target="_blank" rel="noopener" class="card project-card">
-      <div class="project-header">
-        <h3>Multi-Chain Airdrop Farm</h3>
-        <span class="project-badge">TypeScript / CLI + Web UI</span>
-      </div>
-      <p><strong>Problem:</strong> running farming tasks (swap/nft/faucet/deploy) consistently across many chains without manual repetition. <strong>Solution:</strong> CLI + web dashboard bot with per-chain task config and automated GCP deployment (PM2). <strong>Result:</strong> 14 EVM testnets/mainnets supported (Monad, Berachain, Base, Scroll, zkSync, and more) from one codebase.</p>
-      <div class="project-footer">
-        View Repository &rarr;
-      </div>
-    </a>
+  <div class="terminal-card">
+    <header>build-a-pc <span class="badge">Next.js / Gemini API</span></header>
+    <div>
+      <p><strong>Problem:</strong> picking compatible PC parts for a specific use case (gaming/AI/general) is trial-and-error for non-experts.</p>
+      <p><strong>Solution:</strong> part builder that filters for compatibility, estimates per-build performance, and calls Gemini for goal-based GPU recommendations across desktop and laptop catalogs.</p>
+      <p><strong>Result:</strong> 8 shipped iterations, now including affiliate links and per-game "best GPU" SEO landing pages.</p>
+      <p><a href="https://build-a-pc.vercel.app" target="_blank" rel="noopener">View Live App &rarr;</a></p>
+    </div>
   </div>
 </section>
 
-<section class="portfolio-section" style="margin-top: -1rem;">
-  <div class="section-header">
-    <h2>Side Projects</h2>
-  </div>
-  <div class="grid grid-2">
-    <a href="https://ezsplit.vercel.app" target="_blank" rel="noopener" class="card project-card" style="border-color: var(--accent);">
-      <div class="project-header">
-        <h3 style="color: var(--accent);">EzSplit</h3>
-        <span class="project-badge">Next.js / Supabase</span>
-      </div>
-      <p><strong>Problem:</strong> learning English vocabulary by rote gives no insight into word structure or origin. <strong>Solution:</strong> Next.js + Supabase tool that splits any word into prefix/root/suffix and traces its Latin/Greek etymology, with a spaced-repetition study mode. <strong>Result:</strong> shipped as a live SaaS product with email-based lookup history.</p>
-      <div class="project-footer" style="margin-top: 1rem;">
-        View Live App &rarr;
-      </div>
-    </a>
-    <a href="https://build-a-pc.vercel.app" target="_blank" rel="noopener" class="card project-card">
-      <div class="project-header">
-        <h3>build-a-pc</h3>
-        <span class="project-badge">Next.js / Gemini API</span>
-      </div>
-      <p><strong>Problem:</strong> picking compatible PC parts for a specific use case (gaming/AI/general) is trial-and-error for non-experts. <strong>Solution:</strong> part builder that filters for compatibility, estimates per-build performance, and calls Gemini for goal-based GPU recommendations across desktop and laptop catalogs. <strong>Result:</strong> 8 shipped iterations, now including affiliate links and per-game "best GPU" SEO landing pages.</p>
-      <div class="project-footer" style="margin-top: 1rem;">
-        View Live App &rarr;
-      </div>
-    </a>
-  </div>
-  </div>
-</section>
-
-<section class="portfolio-section">
-  <div class="section-header">
-    <h2>Engineering Notes</h2>
-  </div>
-  <div class="grid grid-3">
-    {% set section = get_section(path="blog/_index.md") %} 
+<section>
+  <header><h2>Engineering Notes</h2></header>
+  <ul>
+    {% set section = get_section(path="blog/_index.md") %}
     {% for page in section.pages | slice(end=3) %}
-    <a href="{{ page.permalink }}" class="card blog-card">
-      <span class="date">{{ page.date | date(format="%B %d, %Y") }}</span>
-      <h3>{{ page.title }}</h3>
-    </a>
+    <li><span class="dim">{{ page.date | date(format="%Y-%m-%d") }}</span> &mdash; <a href="{{ page.permalink }}">{{ page.title }}</a></li>
     {% endfor %}
-  </div>
-  <div class="center-actions" style="margin-top: 2rem; text-align: center;">
-    <a href="/blog" class="btn">View all notes</a>
-  </div>
+  </ul>
+  <p><a href="/blog" class="btn">View all notes &rarr;</a></p>
 </section>
 
-<footer class="footer">
-  <div>DANG TRAN NAM &copy; {{ now() | date(format="%Y") }}</div>
-  <div class="footer-links">
+<footer>
+  <hr />
+  <p class="dim">
+    DANG TRAN NAM &copy; {{ now() | date(format="%Y") }} &middot;
     <a href="mailto:nam.dt161@gmail.com">Email</a> &middot;
     <a href="https://linkedin.com/in/namdt1610" target="_blank" rel="noopener">LinkedIn</a>
-  </div>
+  </p>
 </footer>
 {% endblock %}
