@@ -60,12 +60,9 @@
       <div class="item-title">HIGH-CONCURRENCY INVENTORY ENGINE</div>
     </div>
     <div class="item-subtitle">Personal Project — Go, PostgreSQL</div>
-    <p style="font-size: 0.95rem; margin-top: 0.25rem;"><strong>The Problem:</strong> Built a high-concurrency inventory engine to handle massive transaction volumes during peak traffic periods, ensuring data accuracy and consistency.</p>
-    <ul>
-      <li><strong>Optimistic Locking:</strong> Used version columns to resolve race conditions, preventing over-selling or inventory bugs.</li>
-      <li><strong>ACID Transactions:</strong> Designed the system with ACID transactions to guarantee data integrity for write operations.</li>
-      <li><strong>Query Optimization:</strong> Optimized database queries with multi-column indexes, reducing average query time by 50% and avoiding full table scans.</li>
-    </ul>
+    <p style="font-size: 0.95rem; margin-top: 0.25rem;"><strong>Problem:</strong> Massive transaction volume during peak traffic caused race conditions risking over-selling and inventory bugs.</p>
+    <p style="font-size: 0.95rem; margin-top: 0.5rem;"><strong>Solution:</strong> Optimistic Locking with version columns to resolve race conditions, ACID transactions to guarantee write-side data integrity, and multi-column indexes to avoid full table scans.</p>
+    <p style="font-size: 0.95rem; margin-top: 0.5rem;"><strong>Result:</strong> Average query time down 50%, zero over-selling under concurrent writes.</p>
     <p style="font-size: 0.95rem; margin-top: 0.5rem;"><strong>Tech Stack:</strong> Go, PostgreSQL, Raw SQL for fine-grained performance control.</p>
   </article>
 </section>

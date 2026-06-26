@@ -52,7 +52,7 @@
         <h3>ITAM Telemetry System</h3>
         <span class="project-badge">Go / Circuit Breaker / HMAC</span>
       </div>
-      <p>Cross-platform Go agent harvesting real-time CPU, RAM, and Disk metrics from 100+ edge devices. Circuit Breaker with exponential backoff and jitter keeps monitoring at 99.9% uptime; memory footprint cut over 60% to under 15MB.</p>
+      <p><strong>Problem:</strong> 100+ edge devices needed centralized monitoring without overwhelming the server on reconnect storms. <strong>Solution:</strong> cross-platform Go agent harvesting CPU/RAM/Disk metrics, with Circuit Breaker + exponential backoff/jitter to absorb thundering-herd reconnects. <strong>Result:</strong> 99.9% uptime, memory footprint cut over 60% to under 15MB.</p>
       <div class="project-footer" style="color: var(--fg-dim);">
         An Binh Hospital (Internship)
       </div>
@@ -62,7 +62,7 @@
         <h3>High-Concurrency Inventory Engine</h3>
         <span class="project-badge">Go / PostgreSQL / ACID</span>
       </div>
-      <p>Personal project handling high-volume transactions during peak traffic. Optimistic locking with version columns prevents over-selling; multi-column indexes cut average query time by 50%.</p>
+      <p><strong>Problem:</strong> peak-traffic transaction volume caused race conditions that risked over-selling. <strong>Solution:</strong> optimistic locking with version columns, ACID transactions, multi-column indexes. <strong>Result:</strong> average query time down 50%, zero over-selling under concurrent writes.</p>
       <div class="project-footer">
         View Repository &rarr;
       </div>
@@ -80,7 +80,7 @@
         <h3>Quant Trading Monorepo</h3>
         <span class="project-badge">Go / Python / GCP</span>
       </div>
-      <p><strong>Problem:</strong> capture riskless edge across two markets without directional bets. <strong>Solution:</strong> HOSE ETF arbitrage + DCA on VNDIAMOND via DNSE API, plus a delta-neutral cash & carry bot (spot long / perp short) harvesting Binance funding rate. An earlier XGBoost/Z-score directional model was scrapped after 3 years of backtests confirmed it couldn't beat EMH. <strong>Result:</strong> production, running 24/7 on GCP with an automatic kill switch on yield decay.</p>
+      <p><strong>Problem:</strong> capture riskless edge across two markets without directional bets. <strong>Solution:</strong> HOSE ETF arbitrage + DCA on VNDIAMOND via DNSE API, plus a delta-neutral cash & carry bot (spot long / perp short) harvesting Binance funding rate — replacing an earlier XGBoost/Z-score directional model scrapped after 3 years of backtests confirmed it couldn't beat EMH. <strong>Result:</strong> targets funding APR &gt;119%, running 24/7 on GCP with an automatic kill switch when yield decays below 10% APR.</p>
       <div class="project-footer">
         View Repository &rarr;
       </div>
@@ -105,10 +105,10 @@
   <div class="grid grid-2">
     <a href="https://ezsplit.vercel.app" target="_blank" rel="noopener" class="card project-card" style="border-color: var(--accent);">
       <div class="project-header">
-        <h3 style="color: var(--accent);">EZSplit</h3>
-        <span class="project-badge">Fullstack / Vercel</span>
+        <h3 style="color: var(--accent);">EzSplit</h3>
+        <span class="project-badge">Next.js / Supabase</span>
       </div>
-      <p>My first SaaS application. A streamlined platform for expense tracking and bill splitting, optimized for fast performance and deployed on Vercel's edge infrastructure.</p>
+      <p><strong>Problem:</strong> learning English vocabulary by rote gives no insight into word structure or origin. <strong>Solution:</strong> Next.js + Supabase tool that splits any word into prefix/root/suffix and traces its Latin/Greek etymology, with a spaced-repetition study mode. <strong>Result:</strong> shipped as a live SaaS product with email-based lookup history.</p>
       <div class="project-footer" style="margin-top: 1rem;">
         View Live App &rarr;
       </div>
@@ -118,7 +118,7 @@
         <h3>build-a-pc</h3>
         <span class="project-badge">Next.js / Gemini API</span>
       </div>
-      <p>PC part builder: filters compatible parts, estimates gaming/AI/app performance per build, and uses Gemini for goal-based GPU recommendations.</p>
+      <p><strong>Problem:</strong> picking compatible PC parts for a specific use case (gaming/AI/general) is trial-and-error for non-experts. <strong>Solution:</strong> part builder that filters for compatibility, estimates per-build performance, and calls Gemini for goal-based GPU recommendations across desktop and laptop catalogs. <strong>Result:</strong> 8 shipped iterations, now including affiliate links and per-game "best GPU" SEO landing pages.</p>
       <div class="project-footer" style="margin-top: 1rem;">
         View Live App &rarr;
       </div>
