@@ -2,7 +2,7 @@
 {% block content %}
 <header class="portfolio-hero">
   <div class="hero-content">
-    <h1 class="name">Nam (Viktor) Dang</h1>
+    <h1 class="name">Nam (Tyler) Dang</h1>
     <h2 class="hero-title">Software Engineer &rarr; Infrastructure & Low-Level</h2>
     <p class="hero-description">
       Currently a Software Engineer with a deep passion for the lower levels of the stack. I am actively expanding my expertise into network infrastructure (CCNA) and Linux systems administration (LPI) to build resilient, high-performance systems from the bare metal up.
@@ -59,20 +59,20 @@
   <div class="grid grid-2">
     <div class="card project-card">
       <div class="project-header">
-        <h3>ITAM Telemetry Daemon</h3>
-        <span class="project-badge">Go / OS APIs / GPO</span>
+        <h3>ITAM Telemetry System</h3>
+        <span class="project-badge">Go / Circuit Breaker / HMAC</span>
       </div>
-      <p>A lightweight, cross-platform daemon harvesting system telemetry via low-level OS APIs. Engineered network resilience with Circuit Breakers and Jitter patterns to prevent thundering herds from thousands of edge agents.</p>
+      <p>Cross-platform Go agent harvesting real-time CPU, RAM, and Disk metrics from 100+ edge devices. Circuit Breaker with exponential backoff and jitter keeps monitoring at 99.9% uptime; memory footprint cut over 60% to under 15MB.</p>
       <div class="project-footer" style="color: var(--fg-dim);">
         An Binh Hospital (Internship)
       </div>
     </div>
     <a href="https://github.com/namdt1610/limited-drop-platform" target="_blank" rel="noopener" class="card project-card">
       <div class="project-header">
-        <h3>Donald Vibe Engine</h3>
-        <span class="project-badge">Go / SQLite WAL / Docker</span>
+        <h3>High-Concurrency Inventory Engine</h3>
+        <span class="project-badge">Go / PostgreSQL / ACID</span>
       </div>
-      <p>Architected a high-concurrency transactional engine surviving "thundering herd" traffic spikes. Executed C-level OS tuning on SQLite (fsync reduction, WAL) to sustain 10,000+ writes/sec with sub-0.1ms latency.</p>
+      <p>Personal project handling high-volume transactions during peak traffic. Optimistic locking with version columns prevents over-selling; multi-column indexes cut average query time by 50%.</p>
       <div class="project-footer">
         View Repository &rarr;
       </div>

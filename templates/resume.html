@@ -10,7 +10,7 @@
         Back to Portfolio
       </a>
       <h1 class="name">DANG TRAN NAM</h1>
-      <div class="title">Systems & Network Engineer</div>
+      <div class="title">Software Engineer Intern</div>
       <div class="location">Hoa Hung Ward, Ho Chi Minh</div>
     </div>
     <a href="/Nam_Dang_CV.pdf" target="_blank" download class="btn no-print" title="Direct Download PDF">
@@ -22,70 +22,61 @@
   </div>
   <div class="contact-links">
     <a href="mailto:nam.dt161@gmail.com">nam.dt161@gmail.com</a>
+    <a href="tel:0981405314">0981405314</a>
     <a href="https://github.com/namdt1610" target="_blank" rel="noopener">Github</a>
     <a href="https://linkedin.com/in/namdt1610" target="_blank" rel="noopener">LinkedIn</a>
   </div>
 </header>
 
 <section class="summary">
-  Currently a Software Engineer with a deep passion for the lower levels of the stack. I am actively expanding my expertise into network infrastructure (CCNA) and Linux systems administration (LPI). I specialize in building resilient, high-performance architectures, focusing on OS-level tuning, bare-metal optimization, and robust distributed deployments.
+  A detail-oriented Software Engineer with a strong interest in backend/database architecture and performance optimization. I strive to build reliable, high-efficiency systems by understanding the fundamental interactions between software and hardware. Committed to writing clean, maintainable code and continuously optimizing system latency through data-driven approaches.
 </section>
 
 <section>
   <h2>Experience</h2>
-  
+
   <article class="item">
     <div class="item-header">
       <div class="item-title">An Binh Hospital</div>
       <div class="item-meta">Jan 2026 - Present</div>
     </div>
     <div class="item-subtitle">Software Engineer Intern</div>
-    
+
     <div style="font-weight: 500; font-size: 0.95rem; margin-top: 0.5rem;">IT ASSET MANAGEMENT (ITAM) – DISTRIBUTED TELEMETRY SYSTEM</div>
     <ul>
-      <li><strong>Daemon Architecture & OS APIs:</strong> Developed a lightweight, cross-platform daemon in Go to harvest system telemetry (CPU/RAM/Disk) directly via Windows/Linux OS APIs.</li>
-      <li><strong>Network Resilience:</strong> Engineered a Circuit Breaker pattern with exponential backoff and randomized "Jitter" to prevent network thundering herds when thousands of edge agents poll simultaneously.</li>
-      <li><strong>System Administration & Deployment:</strong> Configured Windows GPO policies to deploy the agent as a persistent, deep-sleep background service with a strict memory footprint (&lt;15MB RAM).</li>
-      <li><strong>Security:</strong> Secured Agent-Server command execution (remote kill switches) using Bearer Tokens and SHA-256 HMAC signature verification.</li>
-    </ul>
-    
-    <div style="font-weight: 500; font-size: 0.95rem; margin-top: 1rem;">IT HELPDESK & NETWORK SUPPORT</div>
-    <ul>
-      <li><strong>Technical Support:</strong> Provided Tier 1 & Tier 2 troubleshooting for hospital staff, resolving hardware, software, and peripheral issues to ensure zero downtime in critical medical environments.</li>
-      <li><strong>Network Troubleshooting:</strong> Assisted in deploying and diagnosing local area networks (LAN), verifying switch connectivity, and maintaining stable intranet access across hospital wards.</li>
-      <li><strong>Systems Provisioning:</strong> Deployed Windows workstations, managed Active Directory user credentials, and enforced strict hospital data security compliance protocols.</li>
+      <li><strong>Distributed Telemetry System:</strong> Designed and developed a cross-platform agent in Go to harvest real-time CPU, RAM, and Disk metrics from over 100+ edge devices, providing centralized monitoring.</li>
+      <li><strong>Resilience & Reliability:</strong> Implemented Circuit Breaker pattern with Exponential Backoff and Jitter logic, preventing Thundering Herd issues during agent reconnection and ensuring 99.9% uptime for the monitoring system.</li>
+      <li><strong>Performance Optimization:</strong> Reduced memory footprint of the agent by over 60% (to under 15MB) by implementing efficient log rotation and strictly typed data structures.</li>
+      <li><strong>Security:</strong> Secured communications using Bearer Token authentication and SHA-256 HMAC signatures, ensuring data integrity and access control.</li>
     </ul>
   </article>
 </section>
 
 <section>
   <h2>Projects</h2>
-  
+
   <article class="item">
     <div class="item-header">
-      <div class="item-title">DONALD VIBE – HIGH-CONCURRENCY INVENTORY ENGINE</div>
+      <div class="item-title">HIGH-CONCURRENCY INVENTORY ENGINE</div>
     </div>
-    <div class="item-subtitle">Solo Architect</div>
-    <p style="font-size: 0.95rem; margin-top: 0.25rem;">A high-concurrency transactional engine architected to survive "thundering herd" traffic spikes without external cache dependencies.</p>
+    <div class="item-subtitle">Personal Project — Go, PostgreSQL</div>
+    <p style="font-size: 0.95rem; margin-top: 0.25rem;"><strong>The Problem:</strong> Built a high-concurrency inventory engine to handle massive transaction volumes during peak traffic periods, ensuring data accuracy and consistency.</p>
     <ul>
-      <li><strong>OS-Level I/O Tuning:</strong> Configured SQLite in WAL (Write-Ahead Logging) mode and executed C-level PRAGMA tuning to reduce <code>fsync()</code> syscalls, sustaining 10,000+ writes/sec with deterministic sub-0.1ms p95 latency.</li>
-      <li><strong>Containerization & Infrastructure:</strong> Engineered ultra-lightweight (~15MB) multi-stage Docker builds on Alpine Linux. Orchestrated multi-tier topologies (Nginx Load Balancer, App Replicas) via Docker Compose.</li>
-      <li><strong>Cloud Automation:</strong> Automated AWS service provisioning (S3, SQS) using LocalStack and Bash scripting to ensure strict environment parity across CI pipelines.</li>
+      <li><strong>Optimistic Locking:</strong> Used version columns to resolve race conditions, preventing over-selling or inventory bugs.</li>
+      <li><strong>ACID Transactions:</strong> Designed the system with ACID transactions to guarantee data integrity for write operations.</li>
+      <li><strong>Query Optimization:</strong> Optimized database queries with multi-column indexes, reducing average query time by 50% and avoiding full table scans.</li>
     </ul>
+    <p style="font-size: 0.95rem; margin-top: 0.5rem;"><strong>Tech Stack:</strong> Go, PostgreSQL, Raw SQL for fine-grained performance control.</p>
   </article>
 </section>
 
 <section>
   <h2>Skills</h2>
-  
+
   <div class="skills">
     <div class="skill-group">
       <div class="skill-label">Hard Skills</div>
-      <div class="skill-list">Linux (Arch/Ubuntu), Golang, Rust, JavaScript, Docker, C/C++, Python, AWS, Google Cloud Platform</div>
-    </div>
-    <div class="skill-group">
-      <div class="skill-label">AI Tooling</div>
-      <div class="skill-list">GPT, Claude, Gemini Pro, Grok (Prompting, Automation, & API Integration)</div>
+      <div class="skill-list">Java, Golang, C/C++, Linux</div>
     </div>
   </div>
 </section>
@@ -108,9 +99,6 @@
   </div>
   <div class="list-item">
     <div class="list-title">AWS Cloud (In Progress)</div>
-  </div>
-  <div class="list-item">
-    <div class="list-title">Software Engineer Intern Certificate - HackerRank</div>
   </div>
 </section>
 
