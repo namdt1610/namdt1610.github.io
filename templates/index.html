@@ -80,17 +80,7 @@
         <h3>Quant Trading Monorepo</h3>
         <span class="project-badge">Go / Python / GCP</span>
       </div>
-      <p>Two isolated automated trading engines: HOSE ETF arbitrage + DCA on VNDIAMOND via DNSE API, and a delta-neutral cash & carry bot harvesting funding rate on Binance futures (spot long / perp short, zero directional exposure). Running 24/7 on GCP.</p>
-      <div class="project-footer">
-        View Repository &rarr;
-      </div>
-    </a>
-    <a href="https://github.com/namdt1610/quant-meme-sniper" target="_blank" rel="noopener" class="card project-card">
-      <div class="project-header">
-        <h3>Memecoin Sniper Bot</h3>
-        <span class="project-badge">Go / WebSocket / Base</span>
-      </div>
-      <p>Go bot listening for new pair events on Base network via WebSocket, running liquidity, honeypot, and ownership checks in parallel goroutines before executing a buy. Dry-run mode for safe testing.</p>
+      <p><strong>Problem:</strong> capture riskless edge across two markets without directional bets. <strong>Solution:</strong> HOSE ETF arbitrage + DCA on VNDIAMOND via DNSE API, plus a delta-neutral cash & carry bot (spot long / perp short) harvesting Binance funding rate. An earlier XGBoost/Z-score directional model was scrapped after 3 years of backtests confirmed it couldn't beat EMH. <strong>Result:</strong> production, running 24/7 on GCP with an automatic kill switch on yield decay.</p>
       <div class="project-footer">
         View Repository &rarr;
       </div>
@@ -100,7 +90,7 @@
         <h3>Multi-Chain Airdrop Farm</h3>
         <span class="project-badge">TypeScript / CLI + Web UI</span>
       </div>
-      <p>Farming and node-management tool across 14 EVM testnets/mainnets (Monad, Berachain, Base, Scroll, zkSync, and more), with CLI, web dashboard, and automated GCP deployment via PM2.</p>
+      <p><strong>Problem:</strong> running farming tasks (swap/nft/faucet/deploy) consistently across many chains without manual repetition. <strong>Solution:</strong> CLI + web dashboard bot with per-chain task config and automated GCP deployment (PM2). <strong>Result:</strong> 14 EVM testnets/mainnets supported (Monad, Berachain, Base, Scroll, zkSync, and more) from one codebase.</p>
       <div class="project-footer">
         View Repository &rarr;
       </div>
@@ -110,22 +100,30 @@
 
 <section class="portfolio-section" style="margin-top: -1rem;">
   <div class="section-header">
-    <h2>Side SaaS Project</h2>
+    <h2>Side Projects</h2>
   </div>
-  <a href="https://ezsplit.vercel.app" target="_blank" rel="noopener" class="card project-card" style="display: block; border-color: var(--accent);">
-    <div class="project-header">
-      <h3 style="color: var(--accent);">EZSplit</h3>
-      <span class="project-badge">Fullstack / Vercel</span>
-    </div>
-    <p>My first SaaS application. A streamlined platform for expense tracking and bill splitting, optimized for fast performance and deployed on Vercel's edge infrastructure.</p>
-    <div class="project-footer" style="margin-top: 1rem;">
-      View Live App &rarr;
-    </div>
-  </a>
-  <div style="margin-top: 1rem; color: var(--fg-dim); font-size: 0.9rem;">
-    Also shipping:
-    <a href="https://build-a-pc.vercel.app" target="_blank" rel="noopener">build-a-pc</a> &middot;
-    <a href="https://risktool-web.fly.io" target="_blank" rel="noopener">risktool</a>
+  <div class="grid grid-2">
+    <a href="https://ezsplit.vercel.app" target="_blank" rel="noopener" class="card project-card" style="border-color: var(--accent);">
+      <div class="project-header">
+        <h3 style="color: var(--accent);">EZSplit</h3>
+        <span class="project-badge">Fullstack / Vercel</span>
+      </div>
+      <p>My first SaaS application. A streamlined platform for expense tracking and bill splitting, optimized for fast performance and deployed on Vercel's edge infrastructure.</p>
+      <div class="project-footer" style="margin-top: 1rem;">
+        View Live App &rarr;
+      </div>
+    </a>
+    <a href="https://build-a-pc.vercel.app" target="_blank" rel="noopener" class="card project-card">
+      <div class="project-header">
+        <h3>build-a-pc</h3>
+        <span class="project-badge">Next.js / Gemini API</span>
+      </div>
+      <p>PC part builder: filters compatible parts, estimates gaming/AI/app performance per build, and uses Gemini for goal-based GPU recommendations.</p>
+      <div class="project-footer" style="margin-top: 1rem;">
+        View Live App &rarr;
+      </div>
+    </a>
+  </div>
   </div>
 </section>
 
