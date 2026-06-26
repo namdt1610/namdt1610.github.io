@@ -3,9 +3,9 @@
 <header class="portfolio-hero">
   <div class="hero-content">
     <h1 class="name">Nam (Tyler) Dang</h1>
-    <h2 class="hero-title">Software Engineer &rarr; Infrastructure & Low-Level</h2>
+    <h2 class="hero-title">Software Engineer</h2>
     <p class="hero-description">
-      Currently a Software Engineer with a deep passion for the lower levels of the stack. I am actively expanding my expertise into network infrastructure (CCNA) and Linux systems administration (LPI) to build resilient, high-performance systems from the bare metal up.
+      A detail-oriented Software Engineer with a strong interest in backend/database architecture and performance optimization. I build reliable, high-efficiency systems through clean, maintainable code and data-driven latency optimization.
     </p>
     <div class="hero-actions">
       <a href="/resume" class="btn btn-primary">
@@ -30,24 +30,14 @@
   </div>
   <div class="grid grid-2">
     <div class="card spec-card">
-      <div class="card-icon">🌐</div>
-      <h3>Network Engineering</h3>
-      <p>Focused on routing, switching, and robust infrastructure design. Working towards <strong>CCNA</strong> certification.</p>
+      <div class="card-icon">⚡</div>
+      <h3>Backend & Database</h3>
+      <p>Building high-concurrency systems with <strong>Go</strong>, <strong>Java</strong>, and <strong>C/C++</strong>, focused on database architecture and query performance.</p>
     </div>
     <div class="card spec-card">
       <div class="card-icon">🐧</div>
-      <h3>Linux Systems</h3>
-      <p>Deep understanding of Linux internals, OS-level tuning, and system administration. Following the <strong>LPI</strong> track.</p>
-    </div>
-    <div class="card spec-card">
-      <div class="card-icon">⚡</div>
-      <h3>Low-Level Backend</h3>
-      <p>Building high-concurrency systems and zero-allocation hot paths using <strong>Rust</strong>, <strong>C/C++</strong>, and <strong>Golang</strong>.</p>
-    </div>
-    <div class="card spec-card">
-      <div class="card-icon">🤖</div>
-      <h3>AI Tooling & Automation</h3>
-      <p>Integrating and leveraging state-of-the-art LLMs like <strong>GPT, Gemini, Claude, and Grok</strong> for rapid architecture design and system automation.</p>
+      <h3>Linux</h3>
+      <p>Comfortable working day-to-day on Linux for development and systems work.</p>
     </div>
   </div>
 </section>
@@ -80,6 +70,44 @@
   </div>
 </section>
 
+<section class="portfolio-section">
+  <div class="section-header">
+    <h2>Trading & Crypto Systems</h2>
+  </div>
+  <div class="grid grid-2">
+    <a href="https://github.com/namdt1610/quant_crypto_trading" target="_blank" rel="noopener" class="card project-card">
+      <div class="project-header">
+        <h3>Quant Trading Monorepo</h3>
+        <span class="project-badge">Go / Python / GCP</span>
+      </div>
+      <p>Two isolated automated trading engines: HOSE ETF arbitrage + DCA on VNDIAMOND via DNSE API, and a delta-neutral cash & carry bot harvesting funding rate on Binance futures (spot long / perp short, zero directional exposure). Running 24/7 on GCP.</p>
+      <div class="project-footer">
+        View Repository &rarr;
+      </div>
+    </a>
+    <a href="https://github.com/namdt1610/quant-meme-sniper" target="_blank" rel="noopener" class="card project-card">
+      <div class="project-header">
+        <h3>Memecoin Sniper Bot</h3>
+        <span class="project-badge">Go / WebSocket / Base</span>
+      </div>
+      <p>Go bot listening for new pair events on Base network via WebSocket, running liquidity, honeypot, and ownership checks in parallel goroutines before executing a buy. Dry-run mode for safe testing.</p>
+      <div class="project-footer">
+        View Repository &rarr;
+      </div>
+    </a>
+    <a href="https://github.com/namdt1610/trading_system" target="_blank" rel="noopener" class="card project-card">
+      <div class="project-header">
+        <h3>Multi-Chain Airdrop Farm</h3>
+        <span class="project-badge">TypeScript / CLI + Web UI</span>
+      </div>
+      <p>Farming and node-management tool across 14 EVM testnets/mainnets (Monad, Berachain, Base, Scroll, zkSync, and more), with CLI, web dashboard, and automated GCP deployment via PM2.</p>
+      <div class="project-footer">
+        View Repository &rarr;
+      </div>
+    </a>
+  </div>
+</section>
+
 <section class="portfolio-section" style="margin-top: -1rem;">
   <div class="section-header">
     <h2>Side SaaS Project</h2>
@@ -94,6 +122,11 @@
       View Live App &rarr;
     </div>
   </a>
+  <div style="margin-top: 1rem; color: var(--fg-dim); font-size: 0.9rem;">
+    Also shipping:
+    <a href="https://build-a-pc.vercel.app" target="_blank" rel="noopener">build-a-pc</a> &middot;
+    <a href="https://risktool-web.fly.io" target="_blank" rel="noopener">risktool</a>
+  </div>
 </section>
 
 <section class="portfolio-section">
