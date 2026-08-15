@@ -15,7 +15,7 @@
 
 <header>
   <h2>Software Engineer</h2>
-  <p>A detail-oriented Software Engineer with a strong interest in backend/database architecture and performance optimization. I build reliable, high-efficiency systems through clean, maintainable code and data-driven latency optimization.</p>
+  <p>Detail-oriented Software Engineer specializing in backend systems, database architecture, and full-stack SaaS performance. I build high-efficiency, reliable software with data-driven latency optimization, clean architectures, and solid systems fundamentals.</p>
   <p>
     <a href="/resume" class="btn btn-primary">View Full Resume</a>
     <a href="https://github.com/namdt1610" target="_blank" rel="noopener" class="btn">GitHub</a>
@@ -25,33 +25,69 @@
 <section>
   <header><h2>Core Specializations</h2></header>
   <div class="terminal-card">
-    <header>Backend &amp; Database</header>
-    <div>Building high-concurrency systems with Go, Java, and C/C++, focused on database architecture and query performance.</div>
+    <header>Backend &amp; Distributed Systems</header>
+    <div>High-concurrency systems with Go, Java, and Node.js, focused on database architecture, ACID transactions, and query performance.</div>
   </div>
   <div class="terminal-card">
-    <header>Linux</header>
-    <div>Comfortable working day-to-day on Linux for development and systems work.</div>
+    <header>SaaS &amp; Full-Stack Engineering</header>
+    <div>Production-grade web apps using Next.js 15, TypeScript, Prisma, PostgreSQL/Neon, and automated payment pipelines (PayOS, PayPal).</div>
+  </div>
+  <div class="terminal-card">
+    <header>Systems &amp; Linux</header>
+    <div>Linux systems administration, edge telemetry, and containerized deployments with GCP and Docker.</div>
   </div>
 </section>
 
 <section>
-  <header><h2>Featured Projects</h2></header>
+  <header><h2>Featured Projects &amp; Systems</h2></header>
+  
   <div class="terminal-card">
     <header>ITAM Telemetry System <span class="badge">Go / Circuit Breaker / HMAC</span></header>
     <div>
-      <p><strong>Problem:</strong> 100+ edge devices needed centralized monitoring without overwhelming the server on reconnect storms.</p>
-      <p><strong>Solution:</strong> cross-platform Go agent harvesting CPU/RAM/Disk metrics, with Circuit Breaker + exponential backoff/jitter to absorb thundering-herd reconnects.</p>
-      <p><strong>Result:</strong> 99.9% uptime, memory footprint cut over 60% to under 15MB.</p>
+      <p><strong>Problem:</strong> 100+ edge devices needed centralized monitoring without overwhelming the server during reconnect storms.</p>
+      <p><strong>Solution:</strong> Cross-platform Go telemetry agent with Circuit Breaker + exponential backoff/jitter, log rotation, and HMAC SHA-256 security.</p>
+      <p><strong>Result:</strong> 99.9% uptime, memory footprint reduced over 60% to under 15MB.</p>
       <p class="dim">An Binh Hospital (Internship)</p>
     </div>
   </div>
+
+  <div class="terminal-card">
+    <header>EzSplit &mdash; AI Morpheme &amp; Etymology SaaS <span class="badge">Next.js 15 / Prisma / PostgreSQL</span></header>
+    <div>
+      <p><strong>Problem:</strong> Learning vocabulary by rote memorization fails to convey word origins, morphological structure, or long-term retention.</p>
+      <p><strong>Solution:</strong> Full-stack SaaS breaking English words into roots/affixes with interactive Bézier etymology trees, SM-2 Spaced Repetition flashcards, native English dictation practice, and dual checkout (PayOS VietQR + PayPal).</p>
+      <p><strong>Result:</strong> Shipped to production with 51 optimized static/dynamic routes, sub-second latency, and complete bilingual localization.</p>
+      <p><a href="https://ezsplit.vercel.app" target="_blank" rel="noopener">View Live App &rarr;</a> &middot; <a href="https://github.com/namdt1610/word-splitter" target="_blank" rel="noopener">GitHub &rarr;</a></p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>minPOS &mdash; Offline-First Micro-Merchant POS <span class="badge">Go / SQLite / Flutter</span></header>
+    <div>
+      <p><strong>Problem:</strong> Small F&amp;B merchants and kiosks struggle with expensive, bloated Windows POS systems with fragile connectivity.</p>
+      <p><strong>Solution:</strong> Ultra-lightweight POS system with local SQLite storage, background transactional sync, ESC/POS thermal printing, and device-bound license activation.</p>
+      <p><strong>Result:</strong> Instant order dispatch, zero data loss during offline periods, sub-50ms transaction latency.</p>
+      <p><a href="https://github.com/namdt1610/min-pos" target="_blank" rel="noopener">View Repository &rarr;</a></p>
+    </div>
+  </div>
+
   <div class="terminal-card">
     <header>High-Concurrency Inventory Engine <span class="badge">Go / PostgreSQL / ACID</span></header>
     <div>
-      <p><strong>Problem:</strong> peak-traffic transaction volume caused race conditions that risked over-selling.</p>
-      <p><strong>Solution:</strong> optimistic locking with version columns, ACID transactions, multi-column indexes.</p>
-      <p><strong>Result:</strong> average query time down 50%, zero over-selling under concurrent writes.</p>
+      <p><strong>Problem:</strong> Peak-traffic flash sale spikes caused race conditions and inventory overselling.</p>
+      <p><strong>Solution:</strong> Optimistic locking with version columns, ACID write guarantees, and multi-column indexed queries.</p>
+      <p><strong>Result:</strong> Average query latency reduced by 50%, zero over-selling under heavy concurrent writes.</p>
       <p><a href="https://github.com/namdt1610/limited-drop-platform" target="_blank" rel="noopener">View Repository &rarr;</a></p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>build-a-pc &mdash; AI PC Compatibility Engine <span class="badge">Next.js / Gemini API</span></header>
+    <div>
+      <p><strong>Problem:</strong> Choosing compatible PC parts and avoiding bottlenecks requires tedious manual cross-referencing for non-experts.</p>
+      <p><strong>Solution:</strong> Interactive PC builder engine with strict compatibility rules, Gemini AI goal-based recommendations, and dynamic SEO landing pages.</p>
+      <p><strong>Result:</strong> Shipped 8 production iterations with live affiliate integration and sub-second hardware matching.</p>
+      <p><a href="https://build-a-pc.vercel.app" target="_blank" rel="noopener">View Live App &rarr;</a> &middot; <a href="https://github.com/namdt1610/build-a-pc" target="_blank" rel="noopener">GitHub &rarr;</a></p>
     </div>
   </div>
 </section>
@@ -61,41 +97,20 @@
   <div class="terminal-card">
     <header>Quant Trading Monorepo <span class="badge">Go / Python / GCP</span></header>
     <div>
-      <p><strong>Problem:</strong> capture riskless edge across two markets without directional bets.</p>
-      <p><strong>Solution:</strong> HOSE ETF arbitrage + DCA on VNDIAMOND via DNSE API, plus a delta-neutral cash &amp; carry bot (spot long / perp short) harvesting Binance funding rate &mdash; replacing an earlier XGBoost/Z-score directional model scrapped after 3 years of backtests confirmed it couldn't beat EMH.</p>
-      <p><strong>Result:</strong> targets funding APR &gt;119%, running 24/7 on GCP with an automatic kill switch when yield decays below 10% APR.</p>
+      <p><strong>Problem:</strong> Capture statistical arbitrage across markets without taking directional risk.</p>
+      <p><strong>Solution:</strong> Delta-neutral cash &amp; carry funding rate arbitrage bot (Binance spot long / perp short) and HOSE ETF arbitrage via DNSE API, running 24/7 on GCP with automated kill switch when yield drops below 10% APR.</p>
+      <p><strong>Result:</strong> Targets funding APR &gt;119%, 24/7 hands-off operation on cloud infrastructure.</p>
       <p><a href="https://github.com/namdt1610/quant_crypto_trading" target="_blank" rel="noopener">View Repository &rarr;</a></p>
     </div>
   </div>
-  <div class="terminal-card">
-    <header>Multi-Chain Airdrop Farm <span class="badge">TypeScript / CLI + Web UI</span></header>
-    <div>
-      <p><strong>Problem:</strong> running farming tasks (swap/nft/faucet/deploy) consistently across many chains without manual repetition.</p>
-      <p><strong>Solution:</strong> CLI + web dashboard bot with per-chain task config and automated GCP deployment (PM2).</p>
-      <p><strong>Result:</strong> 14 EVM testnets/mainnets supported (Monad, Berachain, Base, Scroll, zkSync, and more) from one codebase.</p>
-      <p><a href="https://github.com/namdt1610/trading_system" target="_blank" rel="noopener">View Repository &rarr;</a></p>
-    </div>
-  </div>
-</section>
 
-<section>
-  <header><h2>Side Projects</h2></header>
   <div class="terminal-card">
-    <header>EzSplit <span class="badge">Next.js / Supabase</span></header>
+    <header>Multi-Chain Automation Suite <span class="badge">TypeScript / CLI + Web UI</span></header>
     <div>
-      <p><strong>Problem:</strong> learning English vocabulary by rote gives no insight into word structure or origin.</p>
-      <p><strong>Solution:</strong> Next.js + Supabase tool that splits any word into prefix/root/suffix and traces its Latin/Greek etymology, with a spaced-repetition study mode.</p>
-      <p><strong>Result:</strong> shipped as a live SaaS product with email-based lookup history.</p>
-      <p><a href="https://ezsplit.vercel.app" target="_blank" rel="noopener">View Live App &rarr;</a></p>
-    </div>
-  </div>
-  <div class="terminal-card">
-    <header>build-a-pc <span class="badge">Next.js / Gemini API</span></header>
-    <div>
-      <p><strong>Problem:</strong> picking compatible PC parts for a specific use case (gaming/AI/general) is trial-and-error for non-experts.</p>
-      <p><strong>Solution:</strong> part builder that filters for compatibility, estimates per-build performance, and calls Gemini for goal-based GPU recommendations across desktop and laptop catalogs.</p>
-      <p><strong>Result:</strong> 8 shipped iterations, now including affiliate links and per-game "best GPU" SEO landing pages.</p>
-      <p><a href="https://build-a-pc.vercel.app" target="_blank" rel="noopener">View Live App &rarr;</a></p>
+      <p><strong>Problem:</strong> Executing repetitive on-chain interactions across fragmented EVM networks.</p>
+      <p><strong>Solution:</strong> CLI + Web dashboard bot supporting configurable per-chain execution with automated GCP deployment.</p>
+      <p><strong>Result:</strong> Supported 14 EVM networks (Monad, Berachain, Base, Scroll, zkSync) from a unified codebase.</p>
+      <p><a href="https://github.com/namdt1610/trading_system" target="_blank" rel="noopener">View Repository &rarr;</a></p>
     </div>
   </div>
 </section>

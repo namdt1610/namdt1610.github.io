@@ -5,16 +5,16 @@
 
 <header>
   <h1>DANG TRAN NAM</h1>
-  <p>Software Engineer Intern &middot; Hoa Hung Ward, Ho Chi Minh</p>
+  <p>Software Engineer &middot; Ho Chi Minh City, Vietnam</p>
   <p class="dim">
     <a href="mailto:nam.dt161@gmail.com">nam.dt161@gmail.com</a> &middot;
     <a href="tel:0981405314">0981405314</a> &middot;
-    <a href="https://github.com/namdt1610" target="_blank" rel="noopener">Github</a> &middot;
+    <a href="https://github.com/namdt1610" target="_blank" rel="noopener">GitHub</a> &middot;
     <a href="https://linkedin.com/in/namdt1610" target="_blank" rel="noopener">LinkedIn</a>
   </p>
 </header>
 
-<p>A detail-oriented Software Engineer with a strong interest in backend/database architecture and performance optimization. I strive to build reliable, high-efficiency systems by understanding the fundamental interactions between software and hardware. Committed to writing clean, maintainable code and continuously optimizing system latency through data-driven approaches.</p>
+<p>Detail-oriented Software Engineer with a strong background in backend systems, database architecture, and full-stack SaaS performance. I build reliable, high-efficiency software with clean code, data-driven latency optimization, and robust distributed resilience.</p>
 
 <section>
   <header><h2>Experience</h2></header>
@@ -23,31 +23,65 @@
     <div>
       <p class="dim">Software Engineer Intern &mdash; IT Asset Management (ITAM): Distributed Telemetry System</p>
       <ul>
-        <li><strong>Distributed Telemetry System:</strong> Designed and developed a cross-platform agent in Go to harvest real-time CPU, RAM, and Disk metrics from over 100+ edge devices, providing centralized monitoring.</li>
-        <li><strong>Resilience &amp; Reliability:</strong> Implemented Circuit Breaker pattern with Exponential Backoff and Jitter logic, preventing Thundering Herd issues during agent reconnection and ensuring 99.9% uptime for the monitoring system.</li>
-        <li><strong>Performance Optimization:</strong> Reduced memory footprint of the agent by over 60% (to under 15MB) by implementing efficient log rotation and strictly typed data structures.</li>
-        <li><strong>Security:</strong> Secured communications using Bearer Token authentication and SHA-256 HMAC signatures, ensuring data integrity and access control.</li>
+        <li><strong>Distributed Telemetry Agent:</strong> Designed and developed a cross-platform Go agent harvesting real-time CPU, RAM, and Disk metrics across 100+ edge devices for centralized observability.</li>
+        <li><strong>Resilience &amp; Reliability:</strong> Implemented Circuit Breaker pattern with Exponential Backoff and Jitter to absorb thundering-herd reconnect spikes, maintaining 99.9% uptime.</li>
+        <li><strong>Performance Optimization:</strong> Reduced agent memory footprint by over 60% (under 15MB) using log rotation and memory-efficient data structures.</li>
+        <li><strong>Security:</strong> Secured endpoint telemetry with Bearer Token auth and SHA-256 HMAC integrity verification.</li>
       </ul>
     </div>
   </div>
 </section>
 
 <section>
-  <header><h2>Projects</h2></header>
+  <header><h2>Key Projects</h2></header>
+  
   <div class="terminal-card">
-    <header>High-Concurrency Inventory Engine <span class="badge">Go, PostgreSQL</span></header>
+    <header>EzSplit &mdash; Full-Stack AI Linguistic SaaS <span class="badge">Next.js 15, TypeScript, PostgreSQL, Prisma</span></header>
     <div>
-      <p><strong>Problem:</strong> Massive transaction volume during peak traffic caused race conditions risking over-selling and inventory bugs.</p>
-      <p><strong>Solution:</strong> Optimistic Locking with version columns to resolve race conditions, ACID transactions to guarantee write-side data integrity, and multi-column indexes to avoid full table scans.</p>
-      <p><strong>Result:</strong> Average query time down 50%, zero over-selling under concurrent writes.</p>
-      <p><strong>Tech Stack:</strong> Go, PostgreSQL, Raw SQL for fine-grained performance control.</p>
+      <p><strong>Problem:</strong> Memorizing vocabulary without understanding etymological structure leads to fast forgetting.</p>
+      <p><strong>Solution:</strong> Built full-stack SaaS with morpheme segmentation, Bézier etymology trees, SM-2 Spaced Repetition, native English Web Speech API audio, and automated PayOS VietQR + PayPal checkout.</p>
+      <p><strong>Result:</strong> Deployed live SaaS with 51 static/dynamic routes, sub-second latency, and bilingual localization.</p>
+      <p><a href="https://ezsplit.vercel.app" target="_blank" rel="noopener">Live Demo: ezsplit.vercel.app</a></p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>minPOS &mdash; Offline-First Micro-Merchant POS <span class="badge">Go, SQLite, Flutter</span></header>
+    <div>
+      <p><strong>Problem:</strong> Small retail/F&amp;B merchants need an ultra-fast, affordable POS system that works reliably without internet.</p>
+      <p><strong>Solution:</strong> Embedded Go backend with SQLite local storage, background transactional sync, thermal receipt printing, and hardware-bound license key generator.</p>
+      <p><strong>Result:</strong> Sub-50ms transaction speeds, offline-first reliability, zero data loss.</p>
+      <p><a href="https://github.com/namdt1610/min-pos" target="_blank" rel="noopener">GitHub Repository</a></p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>High-Concurrency Inventory Engine <span class="badge">Go, PostgreSQL, Raw SQL</span></header>
+    <div>
+      <p><strong>Problem:</strong> Flash-sale peak traffic caused concurrency race conditions and inventory overselling.</p>
+      <p><strong>Solution:</strong> Optimistic Locking with version columns, ACID transactions, and composite indexing.</p>
+      <p><strong>Result:</strong> 50% query time reduction, 0 overselling incidents under high concurrent load.</p>
+      <p><a href="https://github.com/namdt1610/limited-drop-platform" target="_blank" rel="noopener">GitHub Repository</a></p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>build-a-pc &mdash; AI PC Compatibility Engine <span class="badge">Next.js, Gemini API, TypeScript</span></header>
+    <div>
+      <p><strong>Problem:</strong> Choosing matching computer components requires complex validation across specs and bottlenecks.</p>
+      <p><strong>Solution:</strong> Part compatibility engine with Gemini API goal-based recommendations and dynamic SEO pages.</p>
+      <p><strong>Result:</strong> 8 shipped iterations, active affiliate links, sub-second hardware matching.</p>
+      <p><a href="https://build-a-pc.vercel.app" target="_blank" rel="noopener">Live Demo: build-a-pc.vercel.app</a></p>
     </div>
   </div>
 </section>
 
 <section>
-  <header><h2>Skills</h2></header>
-  <p><strong>Hard Skills:</strong> Java, Golang, C/C++, Linux</p>
+  <header><h2>Technical Skills</h2></header>
+  <p><strong>Languages:</strong> Go (Golang), TypeScript, JavaScript, Java, C/C++, SQL</p>
+  <p><strong>Frameworks &amp; Backend:</strong> Next.js, React, Node.js, Express, Prisma ORM, Tailwind CSS</p>
+  <p><strong>Databases:</strong> PostgreSQL, SQLite, Redis</p>
+  <p><strong>DevOps &amp; Tools:</strong> Linux, Docker, GCP, Git, CI/CD, PM2, Circuit Breaker, High-Concurrency Architectures</p>
 </section>
 
 <section>
@@ -62,17 +96,6 @@
     <li>TOEIC (760 R/L)</li>
     <li>AWS Cloud (In Progress)</li>
   </ul>
-</section>
-
-<section class="no-print">
-  <header><h2>Engineering Notes</h2></header>
-  <ul>
-    {% set section = get_section(path="blog/_index.md") %}
-    {% for page in section.pages | slice(end=3) %}
-    <li><span class="dim">{{ page.date | date(format="%Y-%m-%d") }}</span> &mdash; <a href="{{ page.permalink }}">{{ page.title }}</a></li>
-    {% endfor %}
-  </ul>
-  <p><a href="/blog" class="btn">View all notes &rarr;</a></p>
 </section>
 
 <footer class="no-print">

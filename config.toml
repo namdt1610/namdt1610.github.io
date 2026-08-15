@@ -1,15 +1,14 @@
 # Zola configuration
 base_url = "https://namdt1610.github.io"
 title = "Nam (Tyler) Dang"
-description = "Systems & Network Engineer specializing in CCNA infrastructure, Linux systems administration, and backend performance optimization."
+description = "Software Engineer specializing in backend systems, database architecture, and full-stack SaaS performance."
 default_language = "en"
 minify_html = true
 generate_feeds = true
 feed_filenames = ["atom.xml"]
 
-[markdown]
-highlight_code = true
-highlight_theme = "base16-ocean-dark"
+[markdown.highlighting]
+theme = "solarized-dark"
 
 [extra]
 author = "Nam Dang"
