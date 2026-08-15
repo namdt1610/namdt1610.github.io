@@ -14,7 +14,7 @@
   </p>
 </header>
 
-<p>Detail-oriented Software Engineer with a strong background in backend systems, database architecture, and full-stack SaaS performance. I build reliable, high-efficiency software with clean code, data-driven latency optimization, and robust distributed resilience.</p>
+<p>Software Engineer specializing in backend systems, high-concurrency database architectures, and production full-stack SaaS. Experienced in designing resilient distributed agents, low-latency transaction engines, enterprise .NET backends, and Telegram Mini Apps.</p>
 
 <section>
   <header><h2>Experience</h2></header>
@@ -24,9 +24,9 @@
       <p class="dim">Software Engineer Intern &mdash; IT Asset Management (ITAM): Distributed Telemetry System</p>
       <ul>
         <li><strong>Distributed Telemetry Agent:</strong> Designed and developed a cross-platform Go agent harvesting real-time CPU, RAM, and Disk metrics across 100+ edge devices for centralized observability.</li>
-        <li><strong>Resilience &amp; Reliability:</strong> Implemented Circuit Breaker pattern with Exponential Backoff and Jitter to absorb thundering-herd reconnect spikes, maintaining 99.9% uptime.</li>
-        <li><strong>Performance Optimization:</strong> Reduced agent memory footprint by over 60% (under 15MB) using log rotation and memory-efficient data structures.</li>
-        <li><strong>Security:</strong> Secured endpoint telemetry with Bearer Token auth and SHA-256 HMAC integrity verification.</li>
+        <li><strong>Resilience &amp; Reliability:</strong> Implemented Circuit Breaker pattern (100 req/s limit) with Exponential Backoff and Jitter to absorb thundering-herd reconnect spikes, maintaining 99.9% uptime.</li>
+        <li><strong>Performance Optimization:</strong> Reduced agent memory footprint by over 60% (under 15MB) using log rotation (10MB x 7) and memory-efficient data structures.</li>
+        <li><strong>Security &amp; Management:</strong> Secured endpoint telemetry with Bearer Token auth and SHA-256 HMAC integrity verification; built remote kill-switch mechanism.</li>
       </ul>
     </div>
   </div>
@@ -36,17 +36,56 @@
   <header><h2>Key Projects</h2></header>
   
   <div class="terminal-card">
-    <header>EzSplit &mdash; Full-Stack AI Linguistic SaaS <span class="badge">Next.js 15, TypeScript, PostgreSQL, Prisma</span></header>
+    <header>EzSplit &mdash; Full-Stack AI Linguistic SaaS <span class="badge">Next.js 15, TypeScript, PostgreSQL, Prisma, Gemini</span></header>
     <div>
-      <p><strong>Problem:</strong> Memorizing vocabulary without understanding etymological structure leads to fast forgetting.</p>
-      <p><strong>Solution:</strong> Built full-stack SaaS with morpheme segmentation, Bézier etymology trees, SM-2 Spaced Repetition, native English Web Speech API audio, and automated PayOS VietQR + PayPal checkout.</p>
-      <p><strong>Result:</strong> Deployed live SaaS with 51 static/dynamic routes, sub-second latency, and bilingual localization.</p>
+      <p><strong>Problem:</strong> Memorizing vocabulary without understanding etymological structure leads to rapid attrition.</p>
+      <p><strong>Solution:</strong> Built full-stack SaaS with morpheme segmentation, SVG Bézier etymology trees, SM-2 Spaced Repetition flashcards, sub-350ms cached dictionary with async AI enrichment (Gemini 2.5 Flash Lite + DeepSeek fallback), and automated PayOS VietQR + PayPal checkout.</p>
+      <p><strong>Result:</strong> Shipped to production with 51 static/dynamic routes, sub-second latency, and bilingual EN/VI localization.</p>
       <p><a href="https://ezsplit.vercel.app" target="_blank" rel="noopener">Live Demo: ezsplit.vercel.app</a></p>
     </div>
   </div>
 
   <div class="terminal-card">
-    <header>minPOS &mdash; Offline-First Micro-Merchant POS <span class="badge">Go, SQLite, Flutter</span></header>
+    <header>High-Concurrency Inventory Engine <span class="badge">Go Fiber v3, SQLite WAL, SWMR Architecture</span></header>
+    <div>
+      <p><strong>Problem:</strong> Peak flash-sale traffic causes concurrency race conditions and inventory overselling.</p>
+      <p><strong>Solution:</strong> Single-Writer / Multi-Reader (SWMR) model with 100-connection reader pool, 1-connection writer queue guarded by Tx Mutex, and strict serializability (Stock = 1).</p>
+      <p><strong>Result:</strong> Benchmarked at ~10,000 writes/sec on a single SQLite node with p95 latency &lt; 0.1ms and zero overselling.</p>
+      <p><a href="https://github.com/namdt1610/limited-drop-platform" target="_blank" rel="noopener">GitHub Repository</a></p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>TapHoaNho &mdash; Retail Store Management ERP <span class="badge">ASP.NET Core 9, C#, PostgreSQL, React 19, TanStack Router</span></header>
+    <div>
+      <p><strong>Problem:</strong> Retail multi-branch operations require unified batch inventory tracking, supplier management, dynamic promotion policies, and POS checkout.</p>
+      <p><strong>Solution:</strong> ASP.NET Core 9 Web API using Clean Architecture, Repository &amp; Unit of Work pattern, AutoMapper, FluentValidation, and JWT + HttpOnly Cookies. Frontend built with React 19, TypeScript, TanStack Router (type-safe routing), TanStack Query, Zustand, and Ant Design.</p>
+      <p><strong>Result:</strong> Strict domain isolation, end-to-end transactional consistency across orders/stock, and zero frontend runtime route mismatches.</p>
+      <p><a href="https://github.com/namdt1610/shiny-carnival" target="_blank" rel="noopener">GitHub Repository</a></p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>Academy Hub &mdash; Gamified Telegram Mini App (TMA) <span class="badge">React 19, @twa-dev/sdk, Supabase, Tailwind v4</span></header>
+    <div>
+      <p><strong>Problem:</strong> Web3 community onboarding requires native, low-friction learning experiences directly inside Telegram groups without browser redirection.</p>
+      <p><strong>Solution:</strong> Telegram Mini App (TMA) featuring interactive bite-sized lessons, quizzes, XP &amp; streak tracking, global leaderboard, and serverless Telegram Group role-based admin validation (api/check-admin.js).</p>
+      <p><strong>Result:</strong> Zero-login in-chat app launch directly from Telegram bot commands with persistent user learning state.</p>
+      <p><a href="https://github.com/namdt1610/Tele_Mini_App" target="_blank" rel="noopener">GitHub Repository</a></p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>Quant Trading &amp; Due-Diligence Engine <span class="badge">Go, Python, Next.js, GCP Cloud Run, Binance, DNSE</span></header>
+    <div>
+      <p><strong>Problem:</strong> Capture non-directional market yield and generate objective, un-hallucinated crypto asset evaluations.</p>
+      <p><strong>Solution:</strong> Dual-engine trading system with Binance Cash &amp; Carry delta-neutral funding rate arb (locking APR &gt; 119% with kill-switch), HOSE ETF I-NAV arbitrage via DNSE API, and 7-factor hybrid due-diligence system combining CoinGecko quant scoring with multi-agent LLM analysis.</p>
+      <p><strong>Result:</strong> 24/7 cloud execution with zero directional price risk, plus structured institutional research reports.</p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>minPOS &mdash; Offline-First Micro-Merchant POS <span class="badge">Go, SQLite, Flutter, ESC/POS</span></header>
     <div>
       <p><strong>Problem:</strong> Small retail/F&amp;B merchants need an ultra-fast, affordable POS system that works reliably without internet.</p>
       <p><strong>Solution:</strong> Embedded Go backend with SQLite local storage, background transactional sync, thermal receipt printing, and hardware-bound license key generator.</p>
@@ -54,34 +93,15 @@
       <p><a href="https://github.com/namdt1610/min-pos" target="_blank" rel="noopener">GitHub Repository</a></p>
     </div>
   </div>
-
-  <div class="terminal-card">
-    <header>High-Concurrency Inventory Engine <span class="badge">Go, PostgreSQL, Raw SQL</span></header>
-    <div>
-      <p><strong>Problem:</strong> Flash-sale peak traffic caused concurrency race conditions and inventory overselling.</p>
-      <p><strong>Solution:</strong> Optimistic Locking with version columns, ACID transactions, and composite indexing.</p>
-      <p><strong>Result:</strong> 50% query time reduction, 0 overselling incidents under high concurrent load.</p>
-      <p><a href="https://github.com/namdt1610/limited-drop-platform" target="_blank" rel="noopener">GitHub Repository</a></p>
-    </div>
-  </div>
-
-  <div class="terminal-card">
-    <header>build-a-pc &mdash; AI PC Compatibility Engine <span class="badge">Next.js, Gemini API, TypeScript</span></header>
-    <div>
-      <p><strong>Problem:</strong> Choosing matching computer components requires complex validation across specs and bottlenecks.</p>
-      <p><strong>Solution:</strong> Part compatibility engine with Gemini API goal-based recommendations and dynamic SEO pages.</p>
-      <p><strong>Result:</strong> 8 shipped iterations, active affiliate links, sub-second hardware matching.</p>
-      <p><a href="https://build-a-pc.vercel.app" target="_blank" rel="noopener">Live Demo: build-a-pc.vercel.app</a></p>
-    </div>
-  </div>
 </section>
 
 <section>
   <header><h2>Technical Skills</h2></header>
-  <p><strong>Languages:</strong> Go (Golang), TypeScript, JavaScript, Java, C/C++, SQL</p>
-  <p><strong>Frameworks &amp; Backend:</strong> Next.js, React, Node.js, Express, Prisma ORM, Tailwind CSS</p>
-  <p><strong>Databases:</strong> PostgreSQL, SQLite, Redis</p>
-  <p><strong>DevOps &amp; Tools:</strong> Linux, Docker, GCP, Git, CI/CD, PM2, Circuit Breaker, High-Concurrency Architectures</p>
+  <p><strong>Languages:</strong> Go (Golang), TypeScript, JavaScript, C# (.NET), Rust, Java, C/C++, SQL</p>
+  <p><strong>Frameworks &amp; Backend:</strong> Go Fiber, ASP.NET Core 9, Next.js 15/16, React 19, Node.js, Express, Prisma ORM, Entity Framework Core, GORM, HTMX, Tailwind CSS v4, TanStack Router &amp; Query</p>
+  <p><strong>Databases &amp; Caching:</strong> PostgreSQL, SQLite (WAL Mode), Redis, Neon</p>
+  <p><strong>Architecture &amp; Distributed Systems:</strong> High-Concurrency Architecture (SWMR), Circuit Breakers, WebSockets, Telegram Mini Apps (TMA), Repository &amp; Unit of Work Pattern, Clean Architecture, SM-2 Spaced Repetition, Low-Latency Matching Engine</p>
+  <p><strong>DevOps &amp; Tools:</strong> Linux, Docker, GCP (Cloud Run, Compute Engine), Vercel, Git, CI/CD, OpenTelemetry, Puppeteer</p>
 </section>
 
 <section>
@@ -103,3 +123,4 @@
   <p class="dim">DANG TRAN NAM &copy; {{ now() | date(format="%Y") }} &middot; <a href="mailto:nam.dt161@gmail.com">Contact</a></p>
 </footer>
 {% endblock %}
+

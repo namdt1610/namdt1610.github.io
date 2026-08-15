@@ -2,7 +2,10 @@ const puppeteer = require('puppeteer');
 
 (async () => {
   console.log('Launching headless browser...');
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    headless: true
+  });
   const page = await browser.newPage();
   
   console.log('Navigating to http://127.0.0.1:1111/resume...');
