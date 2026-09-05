@@ -1,0 +1,58 @@
+<!doctype html><html lang=en><head><meta charset=UTF-8><meta content="width=device-width,initial-scale=1.0" name=viewport><meta content="Software Engineer specializing in backend systems, database architecture, and full-stack SaaS performance." name=description><meta content="Nam Dang" name=author><meta content="index, follow" name=robots><title>Nam (Tyler) Dang - Software Engineer</title><link href=/favicon.svg rel=icon type=image/svg+xml><link href=https://unpkg.com/terminal.css@0.7.4/dist/terminal.min.css rel=stylesheet><style>@font-face{font-family:JetBrains Mono;src:url(/fonts/JetBrainsMono-Regular.woff2)format("woff2");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:JetBrains Mono;src:url(/fonts/JetBrainsMono-Bold.woff2)format("woff2");font-weight:700;font-style:normal;font-display:swap}:root{--font-stack:"JetBrains Mono",Menlo,Monaco,"Liberation Mono",monospace;--mono-font-stack:"JetBrains Mono",Menlo,Monaco,"Liberation Mono",monospace;--primary-color:#2563eb;--secondary-color:#4b5563;--font-color:#111827;--background-color:#fff;--code-bg-color:#fafafa}.badge{font-size:.75rem;font-family:var(--mono-font-stack);color:var(--secondary-color)}.dim{color:var(--secondary-color)}@media print{.no-print,.terminal-nav{display:none!important}.terminal-card{page-break-inside:avoid;break-inside:avoid}}</style><body class=terminal><main class=container><a href=/blog>← Back to Notes</a><header><h1>Porting Pine Script to Go: Achieving 100% Signal Parity for 24/7 Trading</h1><p class=dim>March 15, 2026 · 3 min read</header><article><p>TradingView’s Pine Script is fantastic for charting and rapid visual prototyping. You drag an indicator onto the chart, tweak a few sliders, and immediately see supply/demand zones highlighted across historical price action.<p>Then you want to trade it automatically.<p>TradingView webhooks are sluggish, prone to dropped HTTP payloads, and offer zero state machine guarantees for complex position management. To trade a strategy reliably with sub-millisecond execution, risk checks, and multi-exchange routing, you must run an autonomous daemon in a compiled language like Go.<p>In <a href=https://github.com/namdt1610/zone-swing-bot>zone-swing-bot</a>, our 46,000-line Go trading engine, we ported an advanced multi-tier Pivot Zone and Retest strategy from Pine Script.<p>Here is why naive ports fail, and how we proved <strong>100% bit-for-bit signal parity</strong> across 7,000 candles before risking real capital.<hr><h2 id=the-subtle-traps-of-pine-script-semantics>The Subtle Traps of Pine Script Semantics</h2><p>Pine Script hides massive complexity behind concise syntax. If you translate Pine to Go line-by-line, your engine will drift within 50 bars.<h3 id=1-wilder-s-smoothed-atr-vs-simple-sma>1. Wilder’s Smoothed ATR vs. Simple SMA</h3><p>Most developers implement Average True Range (ATR) as a simple rolling moving average. Pine Script’s <code>ta.atr(14)</code> uses <strong>Wilder’s Exponential Smoothing</strong>:<p>$$ATR_t = \frac{ATR_{t-1} \times 13 + TR_t}{14}$$<p>If your Go engine uses a standard 14-period SMA or standard EMA ($\alpha = \frac{2}{N+1}$), your zone boundary tolerances ($1.1 \times ATR$) will diverge. Over a 6-month backtest, this tiny drift leads to completely different trades being taken.<pre class=language-go data-lang=go><code class=language-go data-lang=go>// Correct Wilder's ATR implementation in Go
+func ComputeATR(candles []Candle, period int) []float64 {
+    n := len(candles)
+    atr := make([]float64, n)
+    tr := make([]float64, n)
+    
+    tr[0] = candles[0].High - candles[0].Low
+    for i := 1; i < n; i++ {
+        hl := candles[i].High - candles[i].Low
+        hc := math.Abs(candles[i].High - candles[i-1].Close)
+        lc := math.Abs(candles[i].Low - candles[i-1].Close)
+        tr[i] = math.Max(hl, math.Max(hc, lc))
+    }
+    
+    atr[0] = tr[0]
+    for i := 1; i < n; i++ {
+        if i < period {
+            atr[i] = (atr[i-1]*float64(i) + tr[i]) / float64(i+1)
+        } else {
+            atr[i] = (atr[i-1]*float64(period-1) + tr[i]) / float64(period)
+        }
+    }
+    return atr
+}
+</code></pre><h3 id=2-the-confirmation-lag-of-ta-pivothigh>2. The Confirmation Lag of <code>ta.pivothigh</code></h3><p>In Pine Script, <code>ta.pivothigh(hlc3, 4, 4)</code> identifies a peak where candle $t$ has higher <code>hlc3</code> than the 4 candles to its left and the 4 candles to its right.<p>On a TradingView chart, the pivot marker is drawn on candle $t$. But in a live streaming system, <strong>you cannot possibly know candle $t$ was a pivot until candle $t+4$ closes</strong>.<p>If your Go engine forms a zone at bar $t$ instead of buffering 4 bars of lookahead confirmation, you have introduced lookahead bias. The live bot will fire trades on zones that didn't exist yet on the historical chart.<hr><h2 id=the-parity-verification-pipeline>The Parity Verification Pipeline</h2><p>To ensure our Go daemon executed identically to the TradingView chart, we built a dedicated parity testbench (<code>validate_port.py</code> and <code>cmd/thanhng369parity</code>).<p>We pulled 7,000 4-hour candles of BTCUSDT from the Binance public market data API and evaluated every single bar:<ol><li><strong>Pivot Identification:</strong> Strict parity on <code>hlc3</code> pivot coordinates.<li><strong>Zone Creation & Active Selection:</strong> Matching supply and demand bounds, volume confirmation, and max retest episode tracking (<code>MaxRetestEpisodes = 1</code>).<li><strong>Signal Firing:</strong> Precise bar index, entry price, stop-loss, and take-profit coordinates.</ol><pre class=language-python data-lang=python><code class=language-python data-lang=python># validate_port.py
+def validate_parity():
+    bars = json.load(open('btc_4h.json'))
+    
+    # 1. Run exact Pine Script semantic model
+    pine_zones, pine_signals = run_pine_model(bars)
+    
+    # 2. Run Go compiled engine binary output
+    go_zones, go_signals = run_go_engine(bars)
+    
+    # Strict assertion
+    for i in range(len(bars)):
+        assert pine_zones[i] == go_zones[i], f"Zone mismatch at bar {i}"
+        assert pine_signals[i] == go_signals[i], f"Signal mismatch at bar {i}"
+        
+    print("ZONES: IDENTICAL")
+    print("SIGNALS: IDENTICAL")
+</code></pre><p>Only when both the Python reference port and the Go production engine reported <strong><code>ZONES: IDENTICAL</code></strong> and <strong><code>SIGNALS: IDENTICAL</code></strong> across all 7,000 candles did we cut a production release.<hr><h2 id=architecture-from-chart-to-production-daemon>Architecture: From Chart to Production Daemon</h2><p>With signal parity mathematically proven, the Go engine was deployed as a 24/7 background system daemon on an Oracle Cloud VPS:<pre class=language-text data-lang=text><code class=language-text data-lang=text>[ Binance / Bybit WebSocket ]
+             │
+             ▼
+    [ Candle Aggregator ]
+             │ (4h close event)
+             ▼
+    [ Wilder ATR & Pivot Engine ]
+             │ (Strict +4 confirmation)
+             ▼
+    [ Active Zone Selector ] ─── (Max 1 Retest, FVG Filter)
+             │
+             ▼
+   [ Order Execution State Machine ]
+    ├── Bybit V5 API (Paper / Live)
+    ├── SQLite WAL DB (State Persistence)
+    └── Telegram Bot (Instant Alerts)
+</code></pre><h2 id=conclusion>Conclusion</h2><p>Prototyping in Pine Script is fast, but never trade an algorithmic strategy live until you have validated your execution code against the source indicator tick-for-tick.<p>Once you prove parity:<ul><li><strong>No TradingView webhook latency:</strong> Sub-millisecond reaction times directly off WebSocket feeds.<li><strong>State survival:</strong> SQLite database ensures positions survive process restarts.<li><strong>Total control:</strong> Zero vendor lock-in, zero monthly SaaS charting fees.</ul></article><footer><hr><p class=dim>DANG TRAN NAM © 2026 · <a href=mailto:nam.dt161@gmail.com>Contact</a></footer></main>

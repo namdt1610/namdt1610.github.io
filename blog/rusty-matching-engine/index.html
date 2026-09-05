@@ -1,0 +1,20 @@
+<!doctype html><html lang=en><head><meta charset=UTF-8><meta content="width=device-width,initial-scale=1.0" name=viewport><meta content="Software Engineer specializing in backend systems, database architecture, and full-stack SaaS performance." name=description><meta content="Nam Dang" name=author><meta content="index, follow" name=robots><title>Nam (Tyler) Dang - Software Engineer</title><link href=/favicon.svg rel=icon type=image/svg+xml><link href=https://unpkg.com/terminal.css@0.7.4/dist/terminal.min.css rel=stylesheet><style>@font-face{font-family:JetBrains Mono;src:url(/fonts/JetBrainsMono-Regular.woff2)format("woff2");font-weight:400;font-style:normal;font-display:swap}@font-face{font-family:JetBrains Mono;src:url(/fonts/JetBrainsMono-Bold.woff2)format("woff2");font-weight:700;font-style:normal;font-display:swap}:root{--font-stack:"JetBrains Mono",Menlo,Monaco,"Liberation Mono",monospace;--mono-font-stack:"JetBrains Mono",Menlo,Monaco,"Liberation Mono",monospace;--primary-color:#2563eb;--secondary-color:#4b5563;--font-color:#111827;--background-color:#fff;--code-bg-color:#fafafa}.badge{font-size:.75rem;font-family:var(--mono-font-stack);color:var(--secondary-color)}.dim{color:var(--secondary-color)}@media print{.no-print,.terminal-nav{display:none!important}.terminal-card{page-break-inside:avoid;break-inside:avoid}}</style><body class=terminal><main class=container><a href=/blog>← Back to Notes</a><header><h1>Building a Matching Engine in Rust</h1><p class=dim>December 01, 2025 · 1 min read</header><article><p>For <strong>Outlaw</strong>, my HFT-style orderbook, I wanted <strong>sub-microsecond</strong> latency. Standard data structures were not enough.<h2 id=the-problem-with-padding>The Problem with Padding</h2><p>In Rust (and C), structs are aligned in memory.<pre class=language-rust data-lang=rust><code class=language-rust data-lang=rust>struct Order {
+    id: u64,    // 8 bytes
+    active: bool // 1 byte
+    // 7 bytes of PADDING here!
+}
+</code></pre><p>That padding is wasted cache space. In HFT, L3 cache misses are death.<h2 id=the-solution-repr-c-packed>The Solution: <code>#[repr(C, packed)]</code></h2><p>I forced the compiler to pack the struct, but this comes with alignment penalties if you're not careful.<pre class=language-rust data-lang=rust><code class=language-rust data-lang=rust>#[repr(C)]
+struct Order {
+    price: u64,
+    quantity: u64,
+    order_id: u128,
+}
+</code></pre><h2 id=lock-free-logic>Lock-Free Logic</h2><p>Mutexes are slow. <code>RwLock</code> is slower.<p>I architected the engine as a <strong>Single-Threaded Event Loop</strong>.<ol><li>All incoming orders go into a Ring Buffer (LMAX Disruptor style).<li>A single consumer thread pulls orders and mutates the Orderbook.<li>No locks needed because only ONE thread touches the book.</ol><h2 id=binary-persistence>Binary Persistence</h2><p>JSON is slow. Protobuf is okay. Raw bytes are king.<p>I wrote a custom serializer that memcpys the struct directly to a memory-mapped file for crash recovery.<pre class=language-rust data-lang=rust><code class=language-rust data-lang=rust>// Pseudo-code
+unsafe {
+    std::ptr::copy_nonoverlapping(
+        &order as *const _ as *const u8,
+        buffer_ptr,
+        std::mem::size_of::&LTOrder>()
+    );
+}
+</code></pre><p><em>Don't try this at home unless you know exactly what you are doing.</em><h2 id=result>Result</h2><p><strong>< 5 microseconds</strong> matching time per order. The engine runs faster than the network cards can deliver packets.</article><footer><hr><p class=dim>DANG TRAN NAM © 2026 · <a href=mailto:nam.dt161@gmail.com>Contact</a></footer></main>

@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Nam (Tyler) Dang</title>
+    <subtitle>Software Engineer specializing in backend systems, database architecture, and full-stack SaaS performance.</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://namdt1610.github.io/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://namdt1610.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2026-03-15T00:00:00+00:00</updated>
+    <id>https://namdt1610.github.io/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Porting Pine Script to Go: Achieving 100% Signal Parity for 24&#x2F;7 Trading</title>
+        <published>2026-03-15T00:00:00+00:00</published>
+        <updated>2026-03-15T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://namdt1610.github.io/blog/pine-to-go-pivotzone/"/>
+        <id>https://namdt1610.github.io/blog/pine-to-go-pivotzone/</id>
+        
+        <content type="html" xml:base="https://namdt1610.github.io/blog/pine-to-go-pivotzone/">&lt;p&gt;TradingView’s Pine Script is fantastic for charting and rapid visual prototyping. You drag an indicator onto the chart, tweak a few sliders, and immediately see supply&#x2F;demand zones highlighted across historical price action.&lt;&#x2F;p&gt;
+&lt;p&gt;Then you want to trade it automatically.&lt;&#x2F;p&gt;
+&lt;p&gt;TradingView webhooks are sluggish, prone to dropped HTTP payloads, and offer zero state machine guarantees for complex position management. To trade a strategy reliably with sub-millisecond execution, risk checks, and multi-exchange routing, you must run an autonomous daemon in a compiled language like Go.&lt;&#x2F;p&gt;
+&lt;p&gt;In &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;namdt1610&#x2F;zone-swing-bot&quot;&gt;zone-swing-bot&lt;&#x2F;a&gt;, our 46,000-line Go trading engine, we ported an advanced multi-tier Pivot Zone and Retest strategy from Pine Script.&lt;&#x2F;p&gt;
+&lt;p&gt;Here is why naive ports fail, and how we proved &lt;strong&gt;100% bit-for-bit signal parity&lt;&#x2F;strong&gt; across 7,000 candles before risking real capital.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;the-subtle-traps-of-pine-script-semantics&quot;&gt;The Subtle Traps of Pine Script Semantics&lt;&#x2F;h2&gt;
+&lt;p&gt;Pine Script hides massive complexity behind concise syntax. If you translate Pine to Go line-by-line, your engine will drift within 50 bars.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;1-wilder-s-smoothed-atr-vs-simple-sma&quot;&gt;1. Wilder’s Smoothed ATR vs. Simple SMA&lt;&#x2F;h3&gt;
+&lt;p&gt;Most developers implement Average True Range (ATR) as a simple rolling moving average. Pine Script’s &lt;code&gt;ta.atr(14)&lt;&#x2F;code&gt; uses &lt;strong&gt;Wilder’s Exponential Smoothing&lt;&#x2F;strong&gt;:&lt;&#x2F;p&gt;
+&lt;p&gt;$$ATR_t = \frac{ATR_{t-1} \times 13 + TR_t}{14}$$&lt;&#x2F;p&gt;
+&lt;p&gt;If your Go engine uses a standard 14-period SMA or standard EMA ($\alpha = \frac{2}{N+1}$), your zone boundary tolerances ($1.1 \times ATR$) will diverge. Over a 6-month backtest, this tiny drift leads to completely different trades being taken.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&amp;#x2F;&amp;#x2F; Correct Wilder&amp;#x27;s ATR implementation in Go
+func ComputeATR(candles []Candle, period int) []float64 {
+    n := len(candles)
+    atr := make([]float64, n)
+    tr := make([]float64, n)
+    
+    tr[0] = candles[0].High - candles[0].Low
+    for i := 1; i &amp;lt; n; i++ {
+        hl := candles[i].High - candles[i].Low
+        hc := math.Abs(candles[i].High - candles[i-1].Close)
+        lc := math.Abs(candles[i].Low - candles[i-1].Close)
+        tr[i] = math.Max(hl, math.Max(hc, lc))
+    }
+    
+    atr[0] = tr[0]
+    for i := 1; i &amp;lt; n; i++ {
+        if i &amp;lt; period {
+            atr[i] = (atr[i-1]*float64(i) + tr[i]) &amp;#x2F; float64(i+1)
+        } else {
+            atr[i] = (atr[i-1]*float64(period-1) + tr[i]) &amp;#x2F; float64(period)
+        }
+    }
+    return atr
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;2-the-confirmation-lag-of-ta-pivothigh&quot;&gt;2. The Confirmation Lag of &lt;code&gt;ta.pivothigh&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;In Pine Script, &lt;code&gt;ta.pivothigh(hlc3, 4, 4)&lt;&#x2F;code&gt; identifies a peak where candle $t$ has higher &lt;code&gt;hlc3&lt;&#x2F;code&gt; than the 4 candles to its left and the 4 candles to its right.&lt;&#x2F;p&gt;
+&lt;p&gt;On a TradingView chart, the pivot marker is drawn on candle $t$. But in a live streaming system, &lt;strong&gt;you cannot possibly know candle $t$ was a pivot until candle $t+4$ closes&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;If your Go engine forms a zone at bar $t$ instead of buffering 4 bars of lookahead confirmation, you have introduced lookahead bias. The live bot will fire trades on zones that didn&#x27;t exist yet on the historical chart.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;the-parity-verification-pipeline&quot;&gt;The Parity Verification Pipeline&lt;&#x2F;h2&gt;
+&lt;p&gt;To ensure our Go daemon executed identically to the TradingView chart, we built a dedicated parity testbench (&lt;code&gt;validate_port.py&lt;&#x2F;code&gt; and &lt;code&gt;cmd&#x2F;thanhng369parity&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
+&lt;p&gt;We pulled 7,000 4-hour candles of BTCUSDT from the Binance public market data API and evaluated every single bar:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Pivot Identification:&lt;&#x2F;strong&gt; Strict parity on &lt;code&gt;hlc3&lt;&#x2F;code&gt; pivot coordinates.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Zone Creation &amp;amp; Active Selection:&lt;&#x2F;strong&gt; Matching supply and demand bounds, volume confirmation, and max retest episode tracking (&lt;code&gt;MaxRetestEpisodes = 1&lt;&#x2F;code&gt;).&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Signal Firing:&lt;&#x2F;strong&gt; Precise bar index, entry price, stop-loss, and take-profit coordinates.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;# validate_port.py
+def validate_parity():
+    bars = json.load(open(&amp;#x27;btc_4h.json&amp;#x27;))
+    
+    # 1. Run exact Pine Script semantic model
+    pine_zones, pine_signals = run_pine_model(bars)
+    
+    # 2. Run Go compiled engine binary output
+    go_zones, go_signals = run_go_engine(bars)
+    
+    # Strict assertion
+    for i in range(len(bars)):
+        assert pine_zones[i] == go_zones[i], f&amp;quot;Zone mismatch at bar {i}&amp;quot;
+        assert pine_signals[i] == go_signals[i], f&amp;quot;Signal mismatch at bar {i}&amp;quot;
+        
+    print(&amp;quot;ZONES: IDENTICAL&amp;quot;)
+    print(&amp;quot;SIGNALS: IDENTICAL&amp;quot;)
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Only when both the Python reference port and the Go production engine reported &lt;strong&gt;&lt;code&gt;ZONES: IDENTICAL&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; and &lt;strong&gt;&lt;code&gt;SIGNALS: IDENTICAL&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; across all 7,000 candles did we cut a production release.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;architecture-from-chart-to-production-daemon&quot;&gt;Architecture: From Chart to Production Daemon&lt;&#x2F;h2&gt;
+&lt;p&gt;With signal parity mathematically proven, the Go engine was deployed as a 24&#x2F;7 background system daemon on an Oracle Cloud VPS:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;[ Binance &amp;#x2F; Bybit WebSocket ]
+             │
+             ▼
+    [ Candle Aggregator ]
+             │ (4h close event)
+             ▼
+    [ Wilder ATR &amp;amp; Pivot Engine ]
+             │ (Strict +4 confirmation)
+             ▼
+    [ Active Zone Selector ] ─── (Max 1 Retest, FVG Filter)
+             │
+             ▼
+   [ Order Execution State Machine ]
+    ├── Bybit V5 API (Paper &amp;#x2F; Live)
+    ├── SQLite WAL DB (State Persistence)
+    └── Telegram Bot (Instant Alerts)
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;Prototyping in Pine Script is fast, but never trade an algorithmic strategy live until you have validated your execution code against the source indicator tick-for-tick.&lt;&#x2F;p&gt;
+&lt;p&gt;Once you prove parity:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;No TradingView webhook latency:&lt;&#x2F;strong&gt; Sub-millisecond reaction times directly off WebSocket feeds.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;State survival:&lt;&#x2F;strong&gt; SQLite database ensures positions survive process restarts.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Total control:&lt;&#x2F;strong&gt; Zero vendor lock-in, zero monthly SaaS charting fees.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Taming the Thundering Herd: Resilient Edge Telemetry in Go</title>
+        <published>2026-02-28T00:00:00+00:00</published>
+        <updated>2026-02-28T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://namdt1610.github.io/blog/distributed-telemetry-jitter-backoff/"/>
+        <id>https://namdt1610.github.io/blog/distributed-telemetry-jitter-backoff/</id>
+        
+        <content type="html" xml:base="https://namdt1610.github.io/blog/distributed-telemetry-jitter-backoff/">&lt;p&gt;When you manage a fleet of 100+ Windows workstations across a hospital intranet, edge telemetry sounds simple on paper: collect CPU, RAM, disk, and process stats, and POST them to a server every 5 minutes.&lt;&#x2F;p&gt;
+&lt;p&gt;Until 7:00 AM on Monday morning.&lt;&#x2F;p&gt;
+&lt;p&gt;Fifty nurses and doctors power on their clinic PCs within a 90-second window. Suddenly, 100+ agents wake up at the exact same second and fire HTTP POST payloads at your central collector.&lt;&#x2F;p&gt;
+&lt;p&gt;This is the classic &lt;strong&gt;Thundering Herd&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Without careful engineering, your central server’s CPU spikes, your database locks up, connections time out, and agents enter an uncoordinated retry loop that amplifies the flood until the server collapses.&lt;&#x2F;p&gt;
+&lt;p&gt;Here is how we solved this for the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;namdt1610&#x2F;itam-project&quot;&gt;ITAM Telemetry Agent&lt;&#x2F;a&gt; using Go, SQLite, and distributed resilience patterns.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;1-edge-mitigation-randomized-jitter&quot;&gt;1. Edge Mitigation: Randomized Jitter&lt;&#x2F;h2&gt;
+&lt;p&gt;The simplest and most effective way to kill a thundering herd is &lt;strong&gt;jitter&lt;&#x2F;strong&gt;. Never let clients sync their heartbeat clocks.&lt;&#x2F;p&gt;
+&lt;p&gt;Instead of a rigid &lt;code&gt;time.Sleep(5 * time.Minute)&lt;&#x2F;code&gt;, our background agent injects a random skew between 0 and 30 seconds into every reporting cycle:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&amp;#x2F;&amp;#x2F; agent&amp;#x2F;main.go
+jitter := config.JitterSeconds &amp;#x2F;&amp;#x2F; default 30s
+if jitter &amp;lt;= 0 {
+    jitter = 30
+}
+extraDelay := rand.Intn(jitter)
+
+&amp;#x2F;&amp;#x2F; Disperse 100+ concurrent wakeups across a 30-second window
+totalWait := 5*time.Minute + time.Duration(extraDelay)*time.Second
+time.Sleep(totalWait)
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This single change flattens what would have been a 100-request vertical spike into a manageable trickle of 3 to 4 requests per second.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;2-server-side-circuit-breaker-backoff&quot;&gt;2. Server-Side Circuit Breaker &amp;amp; Backoff&lt;&#x2F;h2&gt;
+&lt;p&gt;What happens if the central server is under maintenance, or the network switch reboots and 100 agents reconnect at the exact same instant?&lt;&#x2F;p&gt;
+&lt;p&gt;We protect the collector with an in-memory rate-limiting circuit breaker that caps incoming telemetry at 100 requests per second:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&amp;#x2F;&amp;#x2F; server&amp;#x2F;handlers.go
+func checkRateLimit() bool {
+    rateLimitMu.Lock()
+    defer rateLimitMu.Unlock()
+
+    now := time.Now()
+    if now.Sub(lastReset) &amp;gt; rateLimitWindow {
+        rateLimitCount = 0
+        lastReset = now
+    }
+    if rateLimitCount &amp;gt;= maxRequestsPerSec {
+        return false &amp;#x2F;&amp;#x2F; Breaker open
+    }
+    rateLimitCount++
+    return true
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If &lt;code&gt;checkRateLimit()&lt;&#x2F;code&gt; fails, the server rejects the request immediately with &lt;code&gt;429 Too Many Requests&lt;&#x2F;code&gt; and sets &lt;code&gt;Retry-After: 5&lt;&#x2F;code&gt;, before allocating memory or reading the JSON body.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;edge-exponential-backoff&quot;&gt;Edge Exponential Backoff&lt;&#x2F;h3&gt;
+&lt;p&gt;When the agent detects HTTP 429, it doesn&#x27;t slam the endpoint again. It parses the header and performs exponential backoff:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&amp;#x2F;&amp;#x2F; agent&amp;#x2F;main.go
+if resp.StatusCode == 429 {
+    retryAfter := resp.Header.Get(&amp;quot;Retry-After&amp;quot;)
+    resp.Body.Close()
+
+    &amp;#x2F;&amp;#x2F; Exponential backoff: 5s -&amp;gt; 10s -&amp;gt; 20s (max 60s)
+    backoffSeconds := 5 * (1 &amp;lt;&amp;lt; attempt)
+    if backoffSeconds &amp;gt; 60 {
+        backoffSeconds = 60
+    }
+    time.Sleep(time.Duration(backoffSeconds) * time.Second)
+    continue
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;3-the-sqlite-single-writer-bottleneck&quot;&gt;3. The SQLite Single-Writer Bottleneck&lt;&#x2F;h2&gt;
+&lt;p&gt;Our central collector uses SQLite in WAL mode. While WAL allows multiple concurrent readers, &lt;strong&gt;SQLite allows exactly one writer at any given instant&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;If multiple Go HTTP handler goroutines attempt to run &lt;code&gt;INSERT INTO assets&lt;&#x2F;code&gt; concurrently, SQLite returns:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Error: database is locked (5) (SQLITE_BUSY)
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;To eliminate write lock contention permanently:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;_txlock=immediate&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;: Forces SQLite to acquire the write lock as soon as the transaction opens, preventing deadlocks from deferred lock upgrades.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;_busy_timeout=10000&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;: Gives pending writes up to 10 seconds to wait for the current writer before timing out.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;SetMaxOpenConns(1)&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;: We limit Go&#x27;s database pool for writes to exactly 1 connection.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&amp;#x2F;&amp;#x2F; server&amp;#x2F;store.go
+dsn := dbPath + &amp;quot;?_journal_mode=WAL&amp;amp;_busy_timeout=10000&amp;amp;_txlock=immediate&amp;quot;
+db, err := sql.Open(&amp;quot;sqlite&amp;quot;, dsn)
+if err != nil {
+    return err
+}
+
+&amp;#x2F;&amp;#x2F; Critical for SQLite: Limit concurrency to avoid &amp;quot;database is locked&amp;quot; errors
+db.SetMaxOpenConns(1)
+db.SetMaxIdleConns(1)
+db.SetConnMaxLifetime(time.Hour)
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;By setting &lt;code&gt;SetMaxOpenConns(1)&lt;&#x2F;code&gt;, Go’s internal &lt;code&gt;database&#x2F;sql&lt;&#x2F;code&gt; connection pool serializes write operations in memory. The database never sees lock collisions.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;4-zero-socket-remote-kill-switch&quot;&gt;4. Zero-Socket Remote Kill Switch&lt;&#x2F;h2&gt;
+&lt;p&gt;Maintaining 100+ persistent WebSockets or gRPC streams on resource-constrained clinic workstations wastes socket descriptors and memory.&lt;&#x2F;p&gt;
+&lt;p&gt;Instead, we piggyback control commands directly onto the HTTP 200 response of normal telemetry reports:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;var serverResp struct {
+    Status  string `json:&amp;quot;status&amp;quot;`
+    Command string `json:&amp;quot;command&amp;quot;`
+}
+json.NewDecoder(resp.Body).Decode(&amp;amp;serverResp)
+
+switch serverResp.Command {
+case &amp;quot;sleep_1h&amp;quot;:
+    time.Sleep(1 * time.Hour)
+case &amp;quot;sleep_24h&amp;quot;:
+    time.Sleep(24 * time.Hour)
+case &amp;quot;exit&amp;quot;:
+    os.Exit(0)
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If an IT admin notices a rogue workstation or needs to halt reports during hospital database backups, they issue a one-time command from the dashboard. The agent executes it upon its next report.&lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;h2 id=&quot;the-numbers&quot;&gt;The Numbers&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Memory Footprint:&lt;&#x2F;strong&gt; &amp;lt; 15MB RAM per agent (compiled Go binary using &lt;code&gt;gopsutil v3&lt;&#x2F;code&gt;).&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Load Test:&lt;&#x2F;strong&gt; Simulated 500 concurrent agents firing reconnect storms against a single-core SQLite server: &lt;strong&gt;0 dropped packets, 0 lock timeouts&lt;&#x2F;strong&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Production Uptime:&lt;&#x2F;strong&gt; 99.9% across hospital departments over months of operation.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Resilience isn&#x27;t about throwing Kubernetes clusters at the problem. A single Go binary, jitter, exponential backoff, and properly configured SQLite can outlast most distributed microservices setups.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Why Your Crypto Backtest Lies (and How We Stress-Test It in Go)</title>
+        <published>2026-02-10T00:00:00+00:00</published>
+        <updated>2026-02-10T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://namdt1610.github.io/blog/gobacktest-monte-carlo/"/>
+        <id>https://namdt1610.github.io/blog/gobacktest-monte-carlo/</id>
+        
+        <content type="html" xml:base="https://namdt1610.github.io/blog/gobacktest-monte-carlo/">&lt;p&gt;Most crypto trading backtests are fiction.&lt;&#x2F;p&gt;
+&lt;p&gt;They live in Jupyter notebooks, fit 15 free parameters on two years of bull market data, and spit out an equity curve that looks like a 45-degree angle. Then you deploy it live with real capital, and it blows up in three weeks.&lt;&#x2F;p&gt;
+&lt;p&gt;When building &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;namdt1610&#x2F;gobacktest&quot;&gt;GoBacktest&lt;&#x2F;a&gt;, I set out to eliminate the three structural lies that make naive backtests look profitable.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;lie-1-the-bar-close-execution-fallacy&quot;&gt;Lie #1: The Bar-Close Execution Fallacy&lt;&#x2F;h2&gt;
+&lt;p&gt;In naive backtest scripts, a strategy signals a long on candle &lt;code&gt;i&lt;&#x2F;code&gt; (evaluated at &lt;code&gt;Close[i]&lt;&#x2F;code&gt;), and the script magically fills the order at that exact &lt;code&gt;Close[i]&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;In reality, you don&#x27;t know candle &lt;code&gt;i&lt;&#x2F;code&gt; has closed until the bar finishes. By the time your WebSocket receives the &lt;code&gt;kline_closed&lt;&#x2F;code&gt; event and your HTTP order hits the exchange matching engine, the price has moved.&lt;&#x2F;p&gt;
+&lt;p&gt;In GoBacktest, execution is strictly chronological. Orders can only fill at the &lt;strong&gt;next bar open&lt;&#x2F;strong&gt;, with an optional &lt;code&gt;EntryDelay&lt;&#x2F;code&gt; parameter to simulate execution lag:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;type Config struct {
+    InitialCapital float64
+    RiskPerTrade   float64 &amp;#x2F;&amp;#x2F; fraction of equity risked per trade
+    RewardRatio    float64 &amp;#x2F;&amp;#x2F; TP distance = RR * risk distance
+    Slippage       float64 &amp;#x2F;&amp;#x2F; fraction added to entry&amp;#x2F;exit fills per leg
+    FundingAPR     float64 &amp;#x2F;&amp;#x2F; annualized funding cost (applied on unrealized)
+    EntryDelay     int     &amp;#x2F;&amp;#x2F; candles to wait after a signal before entry
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Every leg incurs friction: a 2 bps slippage model (&lt;code&gt;0.0002&lt;&#x2F;code&gt; per leg) and funding rate decay deducted per candle for perpetual futures.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;lie-2-the-commutative-fallacy&quot;&gt;Lie #2: The Commutative Fallacy&lt;&#x2F;h2&gt;
+&lt;p&gt;In standard backtests, total profit is calculated as a simple sum:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\text{Net Profit} = \sum_{i=1}^{N} \text{PnL}_i$$&lt;&#x2F;p&gt;
+&lt;p&gt;Because addition is commutative, naive backtests assume trade order does not matter. Trade #1 winning $1,000 and Trade #2 losing $800 gives the same net result as Trade #1 losing $800 and Trade #2 winning $1,000.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;In the real world, trade order is everything.&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;If your strategy experiences a 10-trade losing streak at the start of your live run, you hit max drawdown, panic, or get liquidated. The winning streak that happens six months later in the backtest will never save you if your account is dead on day twelve.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;the-fix-5-000-iteration-monte-carlo-with-circuit-breakers&quot;&gt;The Fix: 5,000-Iteration Monte Carlo with Circuit Breakers&lt;&#x2F;h3&gt;
+&lt;p&gt;To test path dependency, GoBacktest implements seedable Monte Carlo trade shuffling. We take the exact set of closed trades, shuffle the sequence 5,000 times, and simulate the equity path under a strict &lt;strong&gt;30% peak drawdown circuit breaker&lt;&#x2F;strong&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&amp;#x2F;&amp;#x2F; MonteCarlo shuffles the trade sequence and simulates the equity path
+&amp;#x2F;&amp;#x2F; with a drawdown circuit breaker (trading stops at -30% from peak equity).
+&amp;#x2F;&amp;#x2F; This non-linearity is what makes path order matter — a bad streak early
+&amp;#x2F;&amp;#x2F; can kill the account before the good trades arrive.
+func MonteCarlo(r Result, iterations int, seed int64) [3]float64 {
+    if len(r.Trades) == 0 {
+        return [3]float64{0, 0, 0}
+    }
+    pnls := make([]float64, len(r.Trades))
+    for i, t := range r.Trades {
+        pnls[i] = t.PnL
+    }
+    rng := rand.New(rand.NewSource(seed))
+    totals := make([]float64, iterations)
+    initial := r.Config.InitialCapital
+    breaker := 0.70 &amp;#x2F;&amp;#x2F; stop trading after -30% from peak
+
+    for it := 0; it &amp;lt; iterations; it++ {
+        rng.Shuffle(len(pnls), func(i, j int) { pnls[i], pnls[j] = pnls[j], pnls[i] })
+        equity := initial
+        peak := initial
+        for _, p := range pnls {
+            equity += p
+            if equity &amp;gt; peak {
+                peak = equity
+            }
+            if peak &amp;gt; 0 &amp;amp;&amp;amp; equity &amp;lt; peak*breaker {
+                break &amp;#x2F;&amp;#x2F; circuit breaker triggered; simulation halts
+            }
+        }
+        totals[it] = equity - initial
+    }
+    sortFloats(totals)
+    return [3]float64{totals[idx(0.05)], totals[idx(0.50)], totals[idx(0.95)]}
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If the 5th percentile PnL is negative or hits the circuit breaker in a significant percentage of runs, the strategy is discarded—regardless of how high its raw Sharpe ratio was in the in-sample test.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;lie-3-in-sample-overfitting&quot;&gt;Lie #3: In-Sample Overfitting&lt;&#x2F;h2&gt;
+&lt;p&gt;If you test a strategy across 10 altcoins and 80% of the total profit comes from a single parabolic SOL run in Q1 2024, your strategy does not have an edge. It just held SOL during a meme mania.&lt;&#x2F;p&gt;
+&lt;p&gt;GoBacktest enforces &lt;strong&gt;Leave-One-Symbol-Out&lt;&#x2F;strong&gt; cross-validation:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func LeaveOneSymbolOut(candlesBySymbol map[string][]Candle, strat Strategy, cfg Config) []SymbolResult {
+    symbols := getSortedSymbols(candlesBySymbol)
+    out := make([]SymbolResult, 0, len(symbols))
+    for _, dropped := range symbols {
+        subset := dropSymbol(candlesBySymbol, dropped)
+        r := RunMulti(subset, strat, cfg)
+        out = append(out, SymbolResult{Dropped: dropped, KPIs: ComputeKPIs(r)})
+    }
+    return out
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If dropping any single asset collapses the aggregate profit factor from &lt;code&gt;1.85&lt;&#x2F;code&gt; to &lt;code&gt;0.92&lt;&#x2F;code&gt;, the strategy fails validation.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-go-advantage&quot;&gt;The Go Advantage&lt;&#x2F;h2&gt;
+&lt;p&gt;Because GoBacktest is written in pure Go without garbage-heavy abstractions, a 5,000-run Monte Carlo simulation across 2,000 trades executes in &lt;strong&gt;under 45 milliseconds&lt;&#x2F;strong&gt; on a single thread. No NumPy overhead, no memory leaks.&lt;&#x2F;p&gt;
+&lt;p&gt;Stop trusting backtests that assume instant fills, frictionless execution, and static trade sequences. If your strategy cannot survive chronological delays, slippage decay, and Monte Carlo path shuffling, it will not survive the market.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Exploiting SIMD for HFT Latency</title>
+        <published>2026-01-20T00:00:00+00:00</published>
+        <updated>2026-01-20T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://namdt1610.github.io/blog/rust-simd-hft/"/>
+        <id>https://namdt1610.github.io/blog/rust-simd-hft/</id>
+        
+        <content type="html" xml:base="https://namdt1610.github.io/blog/rust-simd-hft/">&lt;p&gt;In High Frequency Trading, if you are processing data with scalar instructions, you are leaving money on the table. Modern CPUs are vector machines disguised as scalar ones.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-bottleneck&quot;&gt;The Bottleneck&lt;&#x2F;h2&gt;
+&lt;p&gt;Parsing market data feeds (e.g., NASDAQ ITCH) involves transforming millions of bytes into integers and floats. Doing this one-by-one is &lt;strong&gt;slow&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&amp;#x2F;&amp;#x2F; Scalar Approach (Slow)
+pub fn scalar_dot_product(a: &amp;amp;[f32], b: &amp;amp;[f32]) -&amp;gt; f32 {
+    a.iter().zip(b).map(|(x, y)| x * y).sum()
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The compiler attempts to auto-vectorize this, but it often fails due to strict IEEE 754 ordering rules or bounds checks.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;enter-std-simd&quot;&gt;Enter &lt;code&gt;std::simd&lt;&#x2F;code&gt;&lt;&#x2F;h2&gt;
+&lt;p&gt;Using portable SIMD (Single Instruction, Multiple Data), we can explicitly tell the CPU to process 8 floats at once (AVX2) or 16 (AVX-512).&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;#![feature(portable_simd)]
+use std::simd::f32x8;
+
+pub fn vector_dot_product(a: &amp;amp;[f32], b: &amp;amp;[f32]) -&amp;gt; f32 {
+    &amp;#x2F;&amp;#x2F; Process 8 items at a time
+    let mut chunks_a = a.chunks_exact(8);
+    let mut chunks_b = b.chunks_exact(8);
+
+    let mut sum = f32x8::splat(0.0);
+
+    for (chunk_a, chunk_b) in chunks_a.zip(chunks_b) {
+        let va = f32x8::from_slice(chunk_a);
+        let vb = f32x8::from_slice(chunk_b);
+        sum += va * vb;
+    }
+
+    &amp;#x2F;&amp;#x2F; Reduce vector to scalar sum
+    sum.reduce_sum()
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;the-hardware-reality&quot;&gt;The Hardware Reality&lt;&#x2F;h2&gt;
+&lt;p&gt;Your CPU has 256-bit (YMM) or 512-bit (ZMM) registers sitting idle.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Scalar&lt;&#x2F;strong&gt;: 1 operation per cycle.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;AVX2&lt;&#x2F;strong&gt;: 8 operations per cycle.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;AVX-512&lt;&#x2F;strong&gt;: 16 operations per cycle.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;real-world-results&quot;&gt;Real World Results&lt;&#x2F;h2&gt;
+&lt;p&gt;On a parsing algorithm for OB snapshot updates:&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Method&lt;&#x2F;th&gt;&lt;th&gt;Throughput&lt;&#x2F;th&gt;&lt;th&gt;Latency&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;Scalar&lt;&#x2F;td&gt;&lt;td&gt;1.2 GB&#x2F;s&lt;&#x2F;td&gt;&lt;td&gt;180 ns&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;strong&gt;AVX2&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;strong&gt;5.8 GB&#x2F;s&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;strong&gt;35 ns&lt;&#x2F;strong&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;Stop relying on the compiler to guess your intent. In critical hot paths, &lt;strong&gt;manual vectorization&lt;&#x2F;strong&gt; is the difference between getting the fill and missing the trade.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Building a Matching Engine in Rust</title>
+        <published>2025-12-01T00:00:00+00:00</published>
+        <updated>2025-12-01T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://namdt1610.github.io/blog/rusty-matching-engine/"/>
+        <id>https://namdt1610.github.io/blog/rusty-matching-engine/</id>
+        
+        <content type="html" xml:base="https://namdt1610.github.io/blog/rusty-matching-engine/">&lt;p&gt;For &lt;strong&gt;Outlaw&lt;&#x2F;strong&gt;, my HFT-style orderbook, I wanted &lt;strong&gt;sub-microsecond&lt;&#x2F;strong&gt; latency. Standard data structures were not enough.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-problem-with-padding&quot;&gt;The Problem with Padding&lt;&#x2F;h2&gt;
+&lt;p&gt;In Rust (and C), structs are aligned in memory.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;struct Order {
+    id: u64,    &amp;#x2F;&amp;#x2F; 8 bytes
+    active: bool &amp;#x2F;&amp;#x2F; 1 byte
+    &amp;#x2F;&amp;#x2F; 7 bytes of PADDING here!
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;That padding is wasted cache space. In HFT, L3 cache misses are death.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-solution-repr-c-packed&quot;&gt;The Solution: &lt;code&gt;#[repr(C, packed)]&lt;&#x2F;code&gt;&lt;&#x2F;h2&gt;
+&lt;p&gt;I forced the compiler to pack the struct, but this comes with alignment penalties if you&#x27;re not careful.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;#[repr(C)]
+struct Order {
+    price: u64,
+    quantity: u64,
+    order_id: u128,
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;lock-free-logic&quot;&gt;Lock-Free Logic&lt;&#x2F;h2&gt;
+&lt;p&gt;Mutexes are slow. &lt;code&gt;RwLock&lt;&#x2F;code&gt; is slower.&lt;&#x2F;p&gt;
+&lt;p&gt;I architected the engine as a &lt;strong&gt;Single-Threaded Event Loop&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;All incoming orders go into a Ring Buffer (LMAX Disruptor style).&lt;&#x2F;li&gt;
+&lt;li&gt;A single consumer thread pulls orders and mutates the Orderbook.&lt;&#x2F;li&gt;
+&lt;li&gt;No locks needed because only ONE thread touches the book.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;binary-persistence&quot;&gt;Binary Persistence&lt;&#x2F;h2&gt;
+&lt;p&gt;JSON is slow. Protobuf is okay. Raw bytes are king.&lt;&#x2F;p&gt;
+&lt;p&gt;I wrote a custom serializer that memcpys the struct directly to a memory-mapped file for crash recovery.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&amp;#x2F;&amp;#x2F; Pseudo-code
+unsafe {
+    std::ptr::copy_nonoverlapping(
+        &amp;amp;order as *const _ as *const u8,
+        buffer_ptr,
+        std::mem::size_of::&amp;lt;Order&amp;gt;()
+    );
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;em&gt;Don&#x27;t try this at home unless you know exactly what you are doing.&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;result&quot;&gt;Result&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;&amp;lt; 5 microseconds&lt;&#x2F;strong&gt; matching time per order.
+The engine runs faster than the network cards can deliver packets.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>How I Handled 9k RPS with Go Fiber and SQLite</title>
+        <published>2025-11-20T00:00:00+00:00</published>
+        <updated>2025-11-20T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://namdt1610.github.io/blog/handling-9k-rps/"/>
+        <id>https://namdt1610.github.io/blog/handling-9k-rps/</id>
+        
+        <content type="html" xml:base="https://namdt1610.github.io/blog/handling-9k-rps/">&lt;p&gt;I validated my &lt;strong&gt;Limited Drop Platform&lt;&#x2F;strong&gt; architecture by pushing it to the limit. The goal: handle a flash sale with thousands of concurrent users trying to buy a limited stock item.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-architecture&quot;&gt;The Architecture&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Language:&lt;&#x2F;strong&gt; Go (1.23+)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Web Framework:&lt;&#x2F;strong&gt; Fiber (Zero allocation)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Database:&lt;&#x2F;strong&gt; SQLite (WAL Mode)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Host:&lt;&#x2F;strong&gt; Local machine (Ryzen 5, 16GB RAM)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;the-bottleneck-race-conditions&quot;&gt;The Bottleneck: Race Conditions&lt;&#x2F;h2&gt;
+&lt;p&gt;When 1,000 users try to buy the last item at the exact same millisecond, you have a race condition.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;naive-approach-wrong&quot;&gt;Naive Approach (Wrong)&lt;&#x2F;h3&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;product := db.GetProduct(id)
+if product.Stock &amp;gt; 0 {
+    product.Stock--
+    db.Save(product)
+    return &amp;quot;Success&amp;quot; &amp;#x2F;&amp;#x2F; FAILS under load
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This fails because 50 goroutines can read &lt;code&gt;Stock = 1&lt;&#x2F;code&gt; at the same time.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;the-fix-pessimistic-locking&quot;&gt;The Fix: Pessimistic Locking&lt;&#x2F;h3&gt;
+&lt;p&gt;I used &lt;code&gt;UPDATE ... WHERE&lt;&#x2F;code&gt; atomic queries to let the database handle the locking.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;&amp;#x2F;&amp;#x2F; Atomic decrement
+result := db.Exec(&amp;quot;UPDATE products SET stock = stock - 1 WHERE id = ? AND stock &amp;gt; 0&amp;quot;, id)
+if result.RowsAffected == 0 {
+    return &amp;quot;Sold Out&amp;quot;
+}
+&amp;#x2F;&amp;#x2F; Proceed to create order
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;performance-tuning&quot;&gt;Performance Tuning&lt;&#x2F;h2&gt;
+&lt;p&gt;To hit 9,000 RPS, I had to optimize the hot path:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Prepared Statements&lt;&#x2F;strong&gt;: Disable re-parsing SQL for every query.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Fiber Prefork&lt;&#x2F;strong&gt;: Use &lt;code&gt;SO_REUSEPORT&lt;&#x2F;code&gt; to spin up multiple Go processes (though on SQLite, single process usually wins due to lock contention).&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Zero Allocation&lt;&#x2F;strong&gt;: Avoid &lt;code&gt;fmt.Sprintf&lt;&#x2F;code&gt; in hot paths. Use &lt;code&gt;strconv&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;h2 id=&quot;result&quot;&gt;Result&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;9k RPS&lt;&#x2F;strong&gt; sustained.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;p99 Latency:&lt;&#x2F;strong&gt; &amp;lt; 15ms.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;CPU Usage:&lt;&#x2F;strong&gt; 60%.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Proof that a monolith is not just viable, it&#x27;s often &lt;strong&gt;superior&lt;&#x2F;strong&gt; for raw throughput per dollar.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Why SQLite WAL Mode is Faster Than You Think</title>
+        <published>2025-10-15T00:00:00+00:00</published>
+        <updated>2025-10-15T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://namdt1610.github.io/blog/sqlite-wal/"/>
+        <id>https://namdt1610.github.io/blog/sqlite-wal/</id>
+        
+        <content type="html" xml:base="https://namdt1610.github.io/blog/sqlite-wal/">&lt;p&gt;Everyone thinks SQLite is a toy database. &quot;It doesn&#x27;t handle concurrency!&quot; they scream. &quot;Use Postgres!&quot; they yell.&lt;&#x2F;p&gt;
+&lt;p&gt;They are wrong.&lt;&#x2F;p&gt;
+&lt;p&gt;When properly configured with &lt;strong&gt;WAL (Write-Ahead Logging)&lt;&#x2F;strong&gt; mode, SQLite is a beast. I used it to handle &lt;strong&gt;9,000 requests per second&lt;&#x2F;strong&gt; on a single cheap VPS.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-myth-of-database-locks&quot;&gt;The Myth of &quot;Database Locks&quot;&lt;&#x2F;h2&gt;
+&lt;p&gt;By default, SQLite uses a rollback journal. This means:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;When writing, it locks the &lt;em&gt;entire&lt;&#x2F;em&gt; database file.&lt;&#x2F;li&gt;
+&lt;li&gt;Readers have to wait.&lt;&#x2F;li&gt;
+&lt;li&gt;Writers have to wait.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;This is shit for high concurrency.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;enter-wal-mode&quot;&gt;Enter WAL Mode&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;sql&quot; class=&quot;language-sql &quot;&gt;&lt;code class=&quot;language-sql&quot; data-lang=&quot;sql&quot;&gt;PRAGMA journal_mode = WAL;
+PRAGMA synchronous = NORMAL;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;With WAL mode enabled:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Readers do not block writers.&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Writers do not block readers.&lt;&#x2F;strong&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;Changes are appended to a &lt;code&gt;-wal&lt;&#x2F;code&gt; file, then checkpointed back to the main DB.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;the-batch-insert-trick&quot;&gt;The &quot;Batch Insert&quot; Trick&lt;&#x2F;h2&gt;
+&lt;p&gt;Syscalls are expensive. Opening a transaction is expensive.&lt;&#x2F;p&gt;
+&lt;p&gt;If you insert 1,000 records one by one:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;1,000 filesystem syncs.&lt;&#x2F;li&gt;
+&lt;li&gt;1,000 lock acquisitions.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;If you batch them:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;tx := db.Begin()
+for _, record := range records {
+    tx.Create(&amp;amp;record)
+}
+tx.Commit()
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;strong&gt;1 filesystem sync.&lt;&#x2F;strong&gt; That&#x27;s how you get 100x performance.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;Stop over-engineering with Kubernetes and Microservices for your 100-user app. A single binary with SQLite running in WAL mode can take you further than you think.&lt;&#x2F;p&gt;
+&lt;p&gt;Keep it simple. Keep it fast.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>
