@@ -14,7 +14,7 @@
   </p>
 </header>
 
-<p>Software Engineer specializing in backend systems, high-concurrency database architectures, and production full-stack SaaS. Experienced in designing resilient distributed agents, low-latency transaction engines, enterprise .NET backends, and Telegram Mini Apps.</p>
+<p>Software Engineer specializing in backend systems, high-concurrency database architectures, quantitative trading engines, and production full-stack SaaS. Experienced in designing resilient distributed edge agents, low-latency transaction engines, algorithmic backtesting frameworks, and enterprise .NET web systems.</p>
 
 <section>
   <header><h2>Experience</h2></header>
@@ -23,10 +23,10 @@
     <div>
       <p class="dim">Software Engineer Intern &mdash; IT Asset Management (ITAM): Distributed Telemetry System</p>
       <ul>
-        <li><strong>Distributed Telemetry Agent:</strong> Designed and developed a cross-platform Go agent harvesting real-time CPU, RAM, and Disk metrics across 100+ edge devices for centralized observability.</li>
-        <li><strong>Resilience &amp; Reliability:</strong> Implemented Circuit Breaker pattern (100 req/s limit) with Exponential Backoff and Jitter to absorb thundering-herd reconnect spikes, maintaining 99.9% uptime.</li>
-        <li><strong>Performance Optimization:</strong> Reduced agent memory footprint by over 60% (under 15MB) using log rotation (10MB x 7) and memory-efficient data structures.</li>
-        <li><strong>Security &amp; Management:</strong> Secured endpoint telemetry with Bearer Token auth and SHA-256 HMAC integrity verification; built remote kill-switch mechanism.</li>
+        <li><strong>Distributed Telemetry Agent:</strong> Designed and developed a cross-platform Go agent harvesting real-time CPU, RAM, Disk, and top processes via <code>gopsutil v3</code> across 100+ edge devices for centralized observability.</li>
+        <li><strong>Resilience &amp; Reliability:</strong> Implemented Circuit Breaker pattern (100 req/s limit on server) with configurable jitter (0-30s) and exponential backoff (5s &rarr; 10s &rarr; 20s) to absorb thundering-herd reconnect storms, maintaining 99.9% uptime.</li>
+        <li><strong>Performance Optimization:</strong> Reduced agent memory footprint by over 60% (under 15MB); built automated log rotation (10MB x 7), startup SQLite database backups, and 30-day historical data pruning.</li>
+        <li><strong>Security &amp; Management:</strong> Secured endpoint telemetry with HTTP Bearer token authentication and remote kill switch (sleep/exit commands); deployed via Windows GPO scheduled tasks and load-tested with 500 simulated agents.</li>
       </ul>
     </div>
   </div>
@@ -36,22 +36,52 @@
   <header><h2>Key Projects</h2></header>
   
   <div class="terminal-card">
-    <header>EzSplit &mdash; Full-Stack AI Linguistic SaaS <span class="badge">Next.js 15, TypeScript, PostgreSQL, Prisma, Gemini</span></header>
+    <header>Radixify &mdash; Full-Stack AI Linguistic SaaS <span class="badge">Next.js 15, TypeScript 5.9, PostgreSQL, Prisma, Gemini, D3.js</span></header>
     <div>
       <p><strong>Problem:</strong> Memorizing vocabulary without understanding etymological structure leads to rapid attrition.</p>
-      <p><strong>Solution:</strong> Built full-stack SaaS with morpheme segmentation, SVG Bézier etymology trees, SM-2 Spaced Repetition flashcards, sub-350ms cached dictionary with async AI enrichment (Gemini 2.5 Flash Lite + DeepSeek fallback), and automated PayOS VietQR + PayPal checkout.</p>
-      <p><strong>Result:</strong> Shipped to production with 51 static/dynamic routes, sub-second latency, and bilingual EN/VI localization.</p>
-      <p><a href="https://ezsplit.vercel.app" target="_blank" rel="noopener">Live Demo: ezsplit.vercel.app</a></p>
+      <p><strong>Solution:</strong> Built full-stack SaaS with 3-pillar breakdown: Morpheme DNA decomposition, SVG B&eacute;zier etymology trees, and physics-based D3.js synaptic neuron maps. Implemented dynamic AI waterfall (Gemini 2.5 Flash &rarr; DeepSeek V3 &rarr; GPT-4o-mini &rarr; Groq) with morphotactic state machine fallback, sub-5ms 2-tier cache (L1 LRU + L2 PostgreSQL), SM-2 Spaced Repetition flashcards, automated PayOS VietQR + Polar.sh/PayPal checkout, and Remotion video generation pipeline.</p>
+      <p><strong>Result:</strong> Live in production at radixify.app with 155 passing Vitest tests and sub-second latency.</p>
+      <p><a href="https://radixify.app" target="_blank" rel="noopener">Live Demo: radixify.app</a> &middot; <a href="https://github.com/namdt1610/word-splitter" target="_blank" rel="noopener">GitHub Repository</a></p>
     </div>
   </div>
 
   <div class="terminal-card">
-    <header>High-Concurrency Inventory Engine <span class="badge">Go Fiber v3, SQLite WAL, SWMR Architecture</span></header>
+    <header>High-Concurrency Inventory Engine <span class="badge">Go Fiber v3, SQLite WAL, SWMR Architecture, 10k w/s</span></header>
     <div>
-      <p><strong>Problem:</strong> Peak flash-sale traffic causes concurrency race conditions and inventory overselling.</p>
-      <p><strong>Solution:</strong> Single-Writer / Multi-Reader (SWMR) model with 100-connection reader pool, 1-connection writer queue guarded by Tx Mutex, and strict serializability (Stock = 1).</p>
-      <p><strong>Result:</strong> Benchmarked at ~10,000 writes/sec on a single SQLite node with p95 latency &lt; 0.1ms and zero overselling.</p>
+      <p><strong>Problem:</strong> Peak flash-sale traffic causes extreme concurrency race conditions and inventory overselling.</p>
+      <p><strong>Solution:</strong> Engineered Single-Writer / Multi-Reader (SWMR) model with 100-connection reader pool, 1-connection writer queue guarded by Tx Mutex, and strict serializability (Stock = 1). Integrated PayOS QR payment webhook handling, LocalStack AWS S3, and K6 load testing suite.</p>
+      <p><strong>Result:</strong> Benchmarked at ~10,000 writes/sec on a single SQLite node with p95 latency &lt; 0.1ms and zero overselling. Graduation thesis project.</p>
       <p><a href="https://github.com/namdt1610/limited-drop-platform" target="_blank" rel="noopener">GitHub Repository</a></p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>Zone Swing Trading Engine <span class="badge">Go 1.22, 46k LOC, Fly.io, Telegram Alerts</span></header>
+    <div>
+      <p><strong>Problem:</strong> Discretionary crypto swing traders suffer from emotional execution, delayed signal detection, and unverified indicator logic.</p>
+      <p><strong>Solution:</strong> High-performance algorithmic crypto trading engine (~46,000 LOC Go, 31 CLI commands, 27 internal packages, 78 tests) reverse-engineering the PivotZone model with strict parity validation against TradingView signals. Implemented multi-tier pivot prominence active zone selection, FVG/regime filters, automated Telegram alert daemon, state persistence, and comprehensive multi-asset backtest cache (BTC, ETH, SOL, SUI, XRP).</p>
+      <p><strong>Result:</strong> Deployed as 24/7 background daemon on Fly.io/VPS with automated state persistence and real-time execution.</p>
+      <p><a href="https://github.com/namdt1610/zone-swing-bot" target="_blank" rel="noopener">GitHub Repository</a></p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>GoBacktest &mdash; Quantitative Strategy Evaluation Framework <span class="badge">Go, Open Source, Walk-Forward, Monte Carlo</span></header>
+    <div>
+      <p><strong>Problem:</strong> Crypto backtests typically overfit historical data in notebook scripts with no execution stress, no slippage modeling, and zero out-of-sample discipline.</p>
+      <p><strong>Solution:</strong> Open-source Go backtesting and stress-testing framework featuring chronological multi-symbol simulation (fill at next open, leg slippage), Walk-Forward Analysis, Leave-One-Symbol-Out cross-validation, and stress testing (slippage, funding APR decay, +1 candle delay). Built deterministic seedable Monte Carlo trade shuffling (5,000+ iterations) for empirical drawdown distributions with zero external dependencies.</p>
+      <p><strong>Result:</strong> Reproducible, institutional-grade strategy evaluation delivering precise win rate, profit factor, CAGR, and drawdown metrics.</p>
+      <p><a href="https://github.com/namdt1610/gobacktest" target="_blank" rel="noopener">GitHub Repository</a></p>
+    </div>
+  </div>
+
+  <div class="terminal-card">
+    <header>Quant Trading Monorepo &mdash; Vault 8386 <span class="badge">Go, Python, GCP Cloud Run, Binance, DNSE</span></header>
+    <div>
+      <p><strong>Problem:</strong> Capture non-directional statistical arbitrage across traditional securities and crypto derivatives.</p>
+      <p><strong>Solution:</strong> Dual-engine automated trading system: (1) Cash &amp; Carry delta-neutral funding rate arb on Binance Futures (Spot Long + Short Perp x1, locking funding APR &gt; 119% with kill-switch on yield decay &lt; 10%); (2) HOSE ETF I-NAV arbitrage &amp; automated DCA for VNDIAMOND ETF (FUEVFVND) via DNSE API on GCP Cloud Run.</p>
+      <p><strong>Result:</strong> 24/7 cloud execution with zero directional price risk.</p>
+      <p><a href="https://github.com/namdt1610/quant_crypto_trading" target="_blank" rel="noopener">GitHub Repository</a></p>
     </div>
   </div>
 
@@ -59,49 +89,30 @@
     <header>TapHoaNho &mdash; Retail Store Management ERP <span class="badge">ASP.NET Core 9, C#, PostgreSQL, React 19, TanStack Router</span></header>
     <div>
       <p><strong>Problem:</strong> Retail multi-branch operations require unified batch inventory tracking, supplier management, dynamic promotion policies, and POS checkout.</p>
-      <p><strong>Solution:</strong> ASP.NET Core 9 Web API using Clean Architecture, Repository &amp; Unit of Work pattern, AutoMapper, FluentValidation, and JWT + HttpOnly Cookies. Frontend built with React 19, TypeScript, TanStack Router (type-safe routing), TanStack Query, Zustand, and Ant Design.</p>
+      <p><strong>Solution:</strong> ASP.NET Core 9 Web API using Clean Architecture, Repository &amp; Unit of Work pattern, AutoMapper, FluentValidation, and JWT auth. Frontend built with React 19, TypeScript, TanStack Router (type-safe routing), TanStack Query, Zustand, Ant Design, camera QR code product scanning, and draft order handling.</p>
       <p><strong>Result:</strong> Strict domain isolation, end-to-end transactional consistency across orders/stock, and zero frontend runtime route mismatches.</p>
       <p><a href="https://github.com/namdt1610/shiny-carnival" target="_blank" rel="noopener">GitHub Repository</a></p>
     </div>
   </div>
 
   <div class="terminal-card">
-    <header>Academy Hub &mdash; Gamified Telegram Mini App (TMA) <span class="badge">React 19, @twa-dev/sdk, Supabase, Tailwind v4</span></header>
-    <div>
-      <p><strong>Problem:</strong> Web3 community onboarding requires native, low-friction learning experiences directly inside Telegram groups without browser redirection.</p>
-      <p><strong>Solution:</strong> Telegram Mini App (TMA) featuring interactive bite-sized lessons, quizzes, XP &amp; streak tracking, global leaderboard, and serverless Telegram Group role-based admin validation (api/check-admin.js).</p>
-      <p><strong>Result:</strong> Zero-login in-chat app launch directly from Telegram bot commands with persistent user learning state.</p>
-      <p><a href="https://github.com/namdt1610/Tele_Mini_App" target="_blank" rel="noopener">GitHub Repository</a></p>
-    </div>
-  </div>
-
-  <div class="terminal-card">
-    <header>Quant Trading &amp; Due-Diligence Engine <span class="badge">Go, Python, Next.js, GCP Cloud Run, Binance, DNSE</span></header>
-    <div>
-      <p><strong>Problem:</strong> Capture non-directional market yield and generate objective, un-hallucinated crypto asset evaluations.</p>
-      <p><strong>Solution:</strong> Dual-engine trading system with Binance Cash &amp; Carry delta-neutral funding rate arb (locking APR &gt; 119% with kill-switch), HOSE ETF I-NAV arbitrage via DNSE API, and 7-factor hybrid due-diligence system combining CoinGecko quant scoring with multi-agent LLM analysis.</p>
-      <p><strong>Result:</strong> 24/7 cloud execution with zero directional price risk, plus structured institutional research reports.</p>
-    </div>
-  </div>
-
-  <div class="terminal-card">
-    <header>minPOS &mdash; Offline-First Micro-Merchant POS <span class="badge">Go, SQLite, Flutter, ESC/POS</span></header>
+    <header>minPOS &mdash; Offline-First Micro-Merchant POS <span class="badge">Go Gin, SQLite WAL, Flutter, License Key Activation</span></header>
     <div>
       <p><strong>Problem:</strong> Small retail/F&amp;B merchants need an ultra-fast, affordable POS system that works reliably without internet.</p>
-      <p><strong>Solution:</strong> Embedded Go backend with SQLite local storage, background transactional sync, thermal receipt printing, and hardware-bound license key generator.</p>
-      <p><strong>Result:</strong> Sub-50ms transaction speeds, offline-first reliability, zero data loss.</p>
-      <p><a href="https://github.com/namdt1610/min-pos" target="_blank" rel="noopener">GitHub Repository</a></p>
+      <p><strong>Solution:</strong> Embedded Go backend (Gin, modernc.org/sqlite WAL mode, JWT auth, hardware-bound license activation CLI) paired with Flutter mobile/tablet client. Features responsive product grid, CartController state management, bill preview modal, order history, daily sales reporting, and Excel data export.</p>
+      <p><strong>Result:</strong> Sub-50ms query latency, offline-first reliability, zero sales data loss.</p>
+      <p><span class="dim">Local MVP &middot; Private Repo</span></p>
     </div>
   </div>
 </section>
 
 <section>
   <header><h2>Technical Skills</h2></header>
-  <p><strong>Languages:</strong> Go (Golang), TypeScript, JavaScript, C# (.NET), Rust, Java, C/C++, SQL</p>
-  <p><strong>Frameworks &amp; Backend:</strong> Go Fiber, ASP.NET Core 9, Next.js 15/16, React 19, Node.js, Express, Prisma ORM, Entity Framework Core, GORM, HTMX, Tailwind CSS v4, TanStack Router &amp; Query</p>
-  <p><strong>Databases &amp; Caching:</strong> PostgreSQL, SQLite (WAL Mode), Redis, Neon</p>
-  <p><strong>Architecture &amp; Distributed Systems:</strong> High-Concurrency Architecture (SWMR), Circuit Breakers, WebSockets, Telegram Mini Apps (TMA), Repository &amp; Unit of Work Pattern, Clean Architecture, SM-2 Spaced Repetition, Low-Latency Matching Engine</p>
-  <p><strong>DevOps &amp; Tools:</strong> Linux, Docker, GCP (Cloud Run, Compute Engine), Vercel, Git, CI/CD, OpenTelemetry, Puppeteer</p>
+  <p><strong>Languages:</strong> Go (Golang), TypeScript, JavaScript, C# (.NET 9), Python, Dart, SQL, C/C++, Rust</p>
+  <p><strong>Frameworks &amp; Backend:</strong> Go Fiber v3, Gin, ASP.NET Core 9, Next.js 15/16, React 19, Node.js, Express, Vite, Flutter, Prisma ORM, Entity Framework Core, HTMX, Tailwind CSS v4, TanStack Router &amp; Query</p>
+  <p><strong>Databases &amp; Caching:</strong> PostgreSQL, SQLite (WAL Mode), Redis, Neon Serverless</p>
+  <p><strong>Architecture &amp; Distributed Systems:</strong> High-Concurrency Architecture (SWMR), Circuit Breakers, Quantitative Backtesting Engines, Walk-Forward Analysis, Monte Carlo Simulation, Clean Architecture, Repository &amp; Unit of Work, SM-2 Spaced Repetition, REST APIs, WebSockets</p>
+  <p><strong>DevOps &amp; Infrastructure:</strong> Linux, Docker, GCP (Cloud Run, Compute Engine), Fly.io, Vercel, Git, K6 Load Testing, Vitest, LocalStack, Puppeteer</p>
 </section>
 
 <section>
